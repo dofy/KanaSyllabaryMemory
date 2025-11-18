@@ -1,10 +1,16 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Klee_One } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+const kleeOne = Klee_One({
+  weight: ["400", "600"],
+  subsets: ["latin"],
+  variable: "--font-klee-one",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://kana.yahaha.net"),
@@ -54,7 +60,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-TW" suppressHydrationWarning>
+    <html lang="zh-TW" suppressHydrationWarning className={kleeOne.variable}>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"

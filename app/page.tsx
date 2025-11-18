@@ -590,7 +590,7 @@ export default function Home() {
               ) : (
                 <>
                   <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
-                    <div className="text-7xl sm:text-8xl md:text-9xl lg:text-[12rem] font-bold">
+                    <div className="text-7xl sm:text-8xl md:text-9xl lg:text-[12rem] font-bold font-kana">
                       {currentKana.displayText}
                     </div>
                     <Button
@@ -616,7 +616,7 @@ export default function Home() {
                             ? "羅馬音"
                             : "平假名"}
                         </div>
-                        <div className="text-2xl sm:text-3xl md:text-4xl font-bold">
+                        <div className="text-2xl sm:text-3xl md:text-4xl font-bold font-kana">
                           {currentKana.remind.split("  ")[0]}
                         </div>
                       </div>
@@ -631,7 +631,7 @@ export default function Home() {
                             ? "羅馬音"
                             : "平假名"}
                         </div>
-                        <div className="text-2xl sm:text-3xl md:text-4xl font-bold">
+                        <div className="text-2xl sm:text-3xl md:text-4xl font-bold font-kana">
                           {currentKana.remind.split("  ")[1]}
                         </div>
                       </div>
