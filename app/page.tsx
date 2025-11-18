@@ -17,6 +17,7 @@ import { FYType, type DisplayMode, type MemoObject } from "@/lib/types";
 import { Github, Moon, Settings, Sun, Volume2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -84,6 +85,9 @@ export default function Home() {
     );
     setKanaList(updated);
     LocalStorage.save("selectedData", updated);
+
+    const selectedCount = updated.filter((k) => k.selected).length;
+    toast.success(`已更新選擇，當前已選擇 ${selectedCount} 個假名`);
   };
 
   const selectKanasByType = (type: FYType, selected: boolean) => {
@@ -92,6 +96,11 @@ export default function Home() {
     );
     setKanaList(updated);
     LocalStorage.save("selectedData", updated);
+
+    const typeName =
+      type === FYType.seion ? "清音" : type === FYType.dakuon ? "濁音" : "拗音";
+    const action = selected ? "全選" : "清空";
+    toast.success(`已${action}${typeName}`);
   };
 
   const handleStart = () => {
@@ -179,6 +188,15 @@ export default function Home() {
   const handleDisplayModeChange = (mode: DisplayMode) => {
     setDisplayMode(mode);
     LocalStorage.save("displayType", mode);
+
+    const modeNames: Record<DisplayMode, string> = {
+      mixed: "混合",
+      hiragana: "平假名",
+      katakana: "片假名",
+      romaji: "羅馬音",
+      swap: "互換",
+    };
+    toast.success(`已切換至${modeNames[mode]}模式`);
   };
 
   const handleLearningModeChange = (isLearning: boolean) => {
@@ -187,6 +205,9 @@ export default function Home() {
     if (isStarted) {
       setShowRemind(isLearning);
     }
+
+    const modeName = isLearning ? "學習模式" : "記憶模式";
+    toast.success(`已切換至${modeName}`);
   };
 
   const goToGitHub = () => {

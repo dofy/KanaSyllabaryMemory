@@ -1,12 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  images: {
-    unoptimized: true,
-  },
-  basePath: process.env.NODE_ENV === 'production' ? '/KanaSyllabaryMemory' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/KanaSyllabaryMemory/' : '',
-}
+  // For Vercel deployment, no special config needed
+  // For GitHub Pages, uncomment the following:
+  // output: 'export',
+  // images: {
+  //   unoptimized: true,
+  // },
+  // basePath: '/KanaSyllabaryMemory',
+  // assetPrefix: '/KanaSyllabaryMemory/',
+};
 
-module.exports = nextConfig
-
+module.exports = nextConfig;
