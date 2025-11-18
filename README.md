@@ -65,7 +65,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/dofy/kana-syllabary-memory.git
+git clone https://github.com/dofy/KanaSyllabaryMemory.git
 cd KanaSyllabaryMemory
 
 # 安装依赖
