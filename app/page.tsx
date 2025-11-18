@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -10,13 +11,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Settings, Volume2, Github, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 import { KanaData } from "@/lib/kana-data";
 import { LocalStorage } from "@/lib/local-storage";
-import { FYType, type MemoObject, type DisplayMode } from "@/lib/types";
+import { FYType, type DisplayMode, type MemoObject } from "@/lib/types";
+import { Github, Moon, Settings, Sun, Volume2 } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -35,8 +35,9 @@ export default function Home() {
 
   const [isStarted, setIsStarted] = useState(false);
   const [showRemind, setShowRemind] = useState(false);
-  const [displayMode, setDisplayMode] = useState<DisplayMode>("A");
+  const [displayMode, setDisplayMode] = useState<DisplayMode>("mixed");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isLearningMode, setIsLearningMode] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -47,6 +48,7 @@ export default function Home() {
     const kd = new KanaData();
     const savedData = LocalStorage.load<MemoObject[]>("selectedData");
     const savedMode = LocalStorage.load<DisplayMode>("displayType");
+    const savedLearningMode = LocalStorage.load<boolean>("learningMode");
 
     if (savedData) {
       setKanaList(savedData);
@@ -56,6 +58,10 @@ export default function Home() {
 
     if (savedMode) {
       setDisplayMode(savedMode);
+    }
+
+    if (savedLearningMode !== null) {
+      setIsLearningMode(savedLearningMode);
     }
   };
 
@@ -77,6 +83,7 @@ export default function Home() {
       k.id === id ? { ...k, selected: !k.selected } : k
     );
     setKanaList(updated);
+    LocalStorage.save("selectedData", updated);
   };
 
   const selectKanasByType = (type: FYType, selected: boolean) => {
@@ -84,6 +91,7 @@ export default function Home() {
       k.fyType === type ? { ...k, selected } : k
     );
     setKanaList(updated);
+    LocalStorage.save("selectedData", updated);
   };
 
   const handleStart = () => {
@@ -92,7 +100,7 @@ export default function Home() {
   };
 
   const getRandomKana = () => {
-    setShowRemind(false);
+    setShowRemind(isLearningMode);
 
     if (displayKanaList.length === 0) {
       return;
@@ -102,34 +110,40 @@ export default function Home() {
     const selectedKana = displayKanaList[randomIndex];
 
     let displayText = "";
-    let remindText = "";
 
     switch (displayMode) {
-      case "A":
+      case "mixed":
         const rand = Math.round(Math.random());
         displayText =
           rand === 1 ? selectedKana.displayText : selectedKana.displayText2;
-        remindText = selectedKana.remind;
         break;
-      case "Ping":
+      case "hiragana":
         displayText = selectedKana.displayText;
-        remindText = selectedKana.remind;
         break;
-      case "Pian":
+      case "katakana":
         displayText = selectedKana.displayText2;
-        remindText = selectedKana.remind;
         break;
-      case "luo":
+      case "romaji":
         displayText = selectedKana.remind;
-        remindText = `${selectedKana.displayText}  ${selectedKana.displayText2}`;
         break;
       case "swap":
         const rand2 = Math.round(Math.random());
         displayText =
           rand2 === 1 ? selectedKana.displayText : selectedKana.displayText2;
-        remindText =
-          rand2 === 1 ? selectedKana.displayText2 : selectedKana.displayText;
         break;
+    }
+
+    // Smart remind logic based on what's displayed
+    let remindText = "";
+    if (displayText === selectedKana.displayText) {
+      // Displaying Hiragana → show Katakana + Romaji
+      remindText = `${selectedKana.displayText2}  ${selectedKana.remind}`;
+    } else if (displayText === selectedKana.displayText2) {
+      // Displaying Katakana → show Hiragana + Romaji
+      remindText = `${selectedKana.displayText}  ${selectedKana.remind}`;
+    } else if (displayText === selectedKana.remind) {
+      // Displaying Romaji → show Hiragana + Katakana
+      remindText = `${selectedKana.displayText}  ${selectedKana.displayText2}`;
     }
 
     if (currentKana.displayText !== displayText) {
@@ -162,38 +176,44 @@ export default function Home() {
     }
   };
 
-  const handleSaveSettings = () => {
-    refreshDisplayData();
-    LocalStorage.save("selectedData", kanaList);
-    LocalStorage.save("displayType", displayMode);
-    setIsSettingsOpen(false);
+  const handleDisplayModeChange = (mode: DisplayMode) => {
+    setDisplayMode(mode);
+    LocalStorage.save("displayType", mode);
+  };
+
+  const handleLearningModeChange = (isLearning: boolean) => {
+    setIsLearningMode(isLearning);
+    LocalStorage.save("learningMode", isLearning);
+    if (isStarted) {
+      setShowRemind(isLearning);
+    }
   };
 
   const goToGitHub = () => {
-    window.open("https://github.com/kidynecat/KanaSyllabaryMemory", "_blank");
+    window.open("https://github.com/dofy/KanaSyllabaryMemory", "_blank");
   };
 
   if (!mounted) return null;
 
-  const qingCount = kanaList.filter(
-    (k) => k.fyType === FYType.qing && k.selected
+  const seionCount = kanaList.filter(
+    (k) => k.fyType === FYType.seion && k.selected
   ).length;
-  const zhuoCount = kanaList.filter(
-    (k) => k.fyType === FYType.zhuo && k.selected
+  const dakuonCount = kanaList.filter(
+    (k) => k.fyType === FYType.dakuon && k.selected
   ).length;
-  const niuCount = kanaList.filter(
-    (k) => k.fyType === FYType.niu && k.selected
+  const yoonCount = kanaList.filter(
+    (k) => k.fyType === FYType.yoon && k.selected
   ).length;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-3 sm:p-4 md:p-6">
+    <main className="min-h-screen flex flex-col sm:items-center sm:justify-center p-0 sm:p-6 md:p-8">
       <audio ref={audioRef} />
 
-      <div className="w-full max-w-2xl space-y-4 sm:space-y-6">
+      <div className="w-full max-w-2xl flex flex-col sm:block h-screen sm:h-auto sm:space-y-6">
         {/* Header */}
-        <div className="relative">
+        <div className="relative px-4 pt-4 pb-3 sm:px-0 sm:pt-0 sm:pb-0 border-b sm:border-b-0">
           {/* Tool Buttons */}
-          <div className="absolute top-0 right-0 flex gap-1.5 sm:gap-2">
+          <div className="absolute top-4 right-4 sm:top-0 sm:right-0 flex gap-1.5 sm:gap-2">
             <Button
               variant="outline"
               size="icon"
@@ -218,29 +238,79 @@ export default function Home() {
               </SheetTrigger>
               <SheetContent className="w-full sm:max-w-md flex flex-col p-0">
                 <SheetHeader className="px-4 sm:px-6 pt-6 pb-4 border-b">
-                  <SheetTitle>设置</SheetTitle>
+                  <SheetTitle>設置</SheetTitle>
                 </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 mb-4">
                   <div className="space-y-5 sm:space-y-6">
+                    {/* Learning Mode */}
+                    <div className="space-y-2 sm:space-y-3">
+                      <h3 className="font-semibold text-sm sm:text-base">
+                        練習模式
+                      </h3>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleLearningModeChange(true)}
+                          className={`
+                            flex-1 px-3 py-2 sm:px-4 sm:py-2.5
+                            text-xs sm:text-sm
+                            rounded-md
+                            border
+                            transition-all
+                            ${
+                              isLearningMode
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-background hover:bg-accent hover:text-accent-foreground border-input"
+                            }
+                          `}
+                        >
+                          學習模式
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleLearningModeChange(false)}
+                          className={`
+                            flex-1 px-3 py-2 sm:px-4 sm:py-2.5
+                            text-xs sm:text-sm
+                            rounded-md
+                            border
+                            transition-all
+                            ${
+                              !isLearningMode
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-background hover:bg-accent hover:text-accent-foreground border-input"
+                            }
+                          `}
+                        >
+                          記憶模式
+                        </button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {isLearningMode
+                          ? "學習模式：自動顯示提示，適合初學者"
+                          : "記憶模式：手動顯示提示，適合複習鞏固"}
+                      </p>
+                    </div>
+
                     {/* Display Mode */}
                     <div className="space-y-2 sm:space-y-3">
                       <h3 className="font-semibold text-sm sm:text-base">
-                        显示模式
+                        顯示模式
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {[
-                          { value: "A", label: "混合" },
-                          { value: "Ping", label: "平假名" },
-                          { value: "Pian", label: "片假名" },
-                          { value: "luo", label: "罗马音" },
-                          { value: "swap", label: "互换" },
+                          { value: "mixed", label: "混合" },
+                          { value: "hiragana", label: "平假名" },
+                          { value: "katakana", label: "片假名" },
+                          { value: "romaji", label: "羅馬音" },
+                          { value: "swap", label: "互換" },
                         ].map((mode) => (
                           <button
                             key={mode.value}
                             type="button"
                             onClick={() =>
-                              setDisplayMode(mode.value as DisplayMode)
+                              handleDisplayModeChange(mode.value as DisplayMode)
                             }
                             className={`
                               px-3 py-1.5 sm:px-4 sm:py-2
@@ -264,12 +334,12 @@ export default function Home() {
                     {/* Kana Selection */}
                     <div className="space-y-2 sm:space-y-3">
                       <h3 className="font-semibold text-sm sm:text-base">
-                        快速选择
+                        快速選擇
                       </h3>
                       <div className="grid grid-cols-3 gap-2">
                         <div className="space-y-1">
                           <div className="text-xs text-muted-foreground">
-                            清音 {qingCount}/46
+                            清音 {seionCount}/46
                           </div>
                           <div className="flex gap-1">
                             <Button
@@ -277,17 +347,17 @@ export default function Home() {
                               variant="outline"
                               className="flex-1 text-xs h-7 px-2"
                               onClick={() =>
-                                selectKanasByType(FYType.qing, true)
+                                selectKanasByType(FYType.seion, true)
                               }
                             >
-                              全选
+                              全選
                             </Button>
                             <Button
                               size="sm"
                               variant="outline"
                               className="flex-1 text-xs h-7 px-2"
                               onClick={() =>
-                                selectKanasByType(FYType.qing, false)
+                                selectKanasByType(FYType.seion, false)
                               }
                             >
                               清空
@@ -296,7 +366,7 @@ export default function Home() {
                         </div>
                         <div className="space-y-1">
                           <div className="text-xs text-muted-foreground">
-                            浊音 {zhuoCount}/25
+                            濁音 {dakuonCount}/25
                           </div>
                           <div className="flex gap-1">
                             <Button
@@ -304,17 +374,17 @@ export default function Home() {
                               variant="outline"
                               className="flex-1 text-xs h-7 px-2"
                               onClick={() =>
-                                selectKanasByType(FYType.zhuo, true)
+                                selectKanasByType(FYType.dakuon, true)
                               }
                             >
-                              全选
+                              全選
                             </Button>
                             <Button
                               size="sm"
                               variant="outline"
                               className="flex-1 text-xs h-7 px-2"
                               onClick={() =>
-                                selectKanasByType(FYType.zhuo, false)
+                                selectKanasByType(FYType.dakuon, false)
                               }
                             >
                               清空
@@ -323,7 +393,7 @@ export default function Home() {
                         </div>
                         <div className="space-y-1">
                           <div className="text-xs text-muted-foreground">
-                            拗音 {niuCount}/33
+                            拗音 {yoonCount}/33
                           </div>
                           <div className="flex gap-1">
                             <Button
@@ -331,17 +401,17 @@ export default function Home() {
                               variant="outline"
                               className="flex-1 text-xs h-7 px-2"
                               onClick={() =>
-                                selectKanasByType(FYType.niu, true)
+                                selectKanasByType(FYType.yoon, true)
                               }
                             >
-                              全选
+                              全選
                             </Button>
                             <Button
                               size="sm"
                               variant="outline"
                               className="flex-1 text-xs h-7 px-2"
                               onClick={() =>
-                                selectKanasByType(FYType.niu, false)
+                                selectKanasByType(FYType.yoon, false)
                               }
                             >
                               清空
@@ -354,7 +424,7 @@ export default function Home() {
                     {/* Individual Kana Selection */}
                     <div className="space-y-2 sm:space-y-3">
                       <h3 className="font-semibold text-sm sm:text-base">
-                        详细选择
+                        詳細選擇
                       </h3>
                       <div className="space-y-4">
                         {/* 清音 */}
@@ -362,13 +432,13 @@ export default function Home() {
                           <div className="flex items-center gap-2">
                             <div className="h-px flex-1 bg-border" />
                             <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                              清音 ({qingCount}/46)
+                              清音 ({seionCount}/46)
                             </h4>
                             <div className="h-px flex-1 bg-border" />
                           </div>
                           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-1">
                             {kanaList
-                              .filter((k) => k.fyType === FYType.qing)
+                              .filter((k) => k.fyType === FYType.seion)
                               .map((kana) => (
                                 <div
                                   key={kana.id}
@@ -393,18 +463,18 @@ export default function Home() {
                           </div>
                         </div>
 
-                        {/* 浊音 */}
+                        {/* 濁音 */}
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <div className="h-px flex-1 bg-border" />
                             <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                              浊音 ({zhuoCount}/25)
+                              濁音 ({dakuonCount}/25)
                             </h4>
                             <div className="h-px flex-1 bg-border" />
                           </div>
                           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-1">
                             {kanaList
-                              .filter((k) => k.fyType === FYType.zhuo)
+                              .filter((k) => k.fyType === FYType.dakuon)
                               .map((kana) => (
                                 <div
                                   key={kana.id}
@@ -434,13 +504,13 @@ export default function Home() {
                           <div className="flex items-center gap-2">
                             <div className="h-px flex-1 bg-border" />
                             <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                              拗音 ({niuCount}/33)
+                              拗音 ({yoonCount}/33)
                             </h4>
                             <div className="h-px flex-1 bg-border" />
                           </div>
                           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-1">
                             {kanaList
-                              .filter((k) => k.fyType === FYType.niu)
+                              .filter((k) => k.fyType === FYType.yoon)
                               .map((kana) => (
                                 <div
                                   key={kana.id}
@@ -468,16 +538,6 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-
-                <div className="border-t p-4 sm:p-6">
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    onClick={handleSaveSettings}
-                  >
-                    保存设置
-                  </Button>
-                </div>
               </SheetContent>
             </Sheet>
             <Button
@@ -499,66 +559,98 @@ export default function Home() {
         </div>
 
         {/* Main Card */}
-        <Card className="border-2">
-          <CardContent className="p-6 sm:p-8 md:p-12">
-            <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-8">
+        <Card className="flex-1 flex flex-col border-0 sm:border-2 rounded-none sm:rounded-lg overflow-hidden sm:flex-initial">
+          <CardContent className="flex-1 flex flex-col p-6 sm:p-8 md:p-12">
+            <div className="flex-1 flex flex-col items-center justify-center space-y-6 sm:space-y-8">
               {!isStarted ? (
                 <div className="text-center space-y-4 sm:space-y-6">
                   <div className="text-5xl sm:text-6xl md:text-7xl font-bold text-muted-foreground">
                     準備
                   </div>
                   <p className="text-base sm:text-lg text-muted-foreground">
-                    已选择: {qingCount + zhuoCount + niuCount} 个假名
+                    已選擇: {seionCount + dakuonCount + yoonCount} 個假名
                   </p>
                 </div>
               ) : (
                 <>
-                  <div
-                    className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold cursor-pointer hover:scale-105 active:scale-95 transition-transform touch-none select-none"
-                    onClick={() => playSound(currentKana.id)}
-                  >
-                    {currentKana.displayText}
+                  <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+                    <div className="text-7xl sm:text-8xl md:text-9xl lg:text-[12rem] font-bold">
+                      {currentKana.displayText}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-14 w-14 sm:h-16 sm:w-16 rounded-full hover:bg-accent flex-shrink-0"
+                      onClick={() => playSound(currentKana.id)}
+                    >
+                      <Volume2 className="h-7 w-7 sm:h-8 sm:w-8" />
+                    </Button>
                   </div>
 
                   {showRemind && (
-                    <div className="text-xl sm:text-2xl md:text-3xl text-muted-foreground animate-in fade-in">
-                      {currentKana.remind}
+                    <div className="flex gap-3 sm:gap-4 animate-in fade-in px-4 sm:px-0">
+                      <div className="flex-1 rounded-lg border-2 bg-card px-4 py-3 sm:px-6 sm:py-4">
+                        <div className="text-xs sm:text-sm text-muted-foreground mb-1">
+                          {currentKana.remind.split("  ")[0] ===
+                          currentKana.displayText
+                            ? "片假名"
+                            : currentKana.remind
+                                .split("  ")[0]
+                                .match(/^[a-z]+$/i)
+                            ? "羅馬音"
+                            : "平假名"}
+                        </div>
+                        <div className="text-2xl sm:text-3xl md:text-4xl font-bold">
+                          {currentKana.remind.split("  ")[0]}
+                        </div>
+                      </div>
+                      <div className="flex-1 rounded-lg border-2 bg-card px-4 py-3 sm:px-6 sm:py-4">
+                        <div className="text-xs sm:text-sm text-muted-foreground mb-1">
+                          {currentKana.remind.split("  ")[1] ===
+                          currentKana.displayText
+                            ? "片假名"
+                            : currentKana.remind
+                                .split("  ")[1]
+                                .match(/^[a-z]+$/i)
+                            ? "羅馬音"
+                            : "平假名"}
+                        </div>
+                        <div className="text-2xl sm:text-3xl md:text-4xl font-bold">
+                          {currentKana.remind.split("  ")[1]}
+                        </div>
+                      </div>
                     </div>
                   )}
 
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full sm:w-auto"
-                      onClick={() => setShowRemind(true)}
-                    >
-                      显示提示
-                    </Button>
-                    <Button
-                      size="lg"
-                      className="w-full sm:w-auto"
-                      onClick={() => playSound(currentKana.id)}
-                    >
-                      <Volume2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                      发音
-                    </Button>
-                  </div>
+                  {!isLearningMode && (
+                    <div className="w-full px-4 sm:px-0 sm:w-auto">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full sm:w-auto sm:min-w-[200px]"
+                        onClick={() => setShowRemind(true)}
+                      >
+                        顯示提示
+                      </Button>
+                    </div>
+                  )}
                 </>
               )}
+            </div>
 
+            <div className="p-4 sm:px-0 sm:pb-0">
               {!isStarted ? (
                 <Button
                   className="w-full"
                   size="lg"
                   onClick={handleStart}
-                  disabled={qingCount + zhuoCount + niuCount === 0}
+                  disabled={seionCount + dakuonCount + yoonCount === 0}
                 >
-                  开始练习
+                  開始
                 </Button>
               ) : (
                 <Button className="w-full" size="lg" onClick={getRandomKana}>
-                  下一个
+                  下一個
                 </Button>
               )}
             </div>
@@ -566,8 +658,8 @@ export default function Home() {
         </Card>
 
         {/* Footer */}
-        <div className="text-center text-xs text-muted-foreground/60 px-2">
-          <p>Copyright © 2025 phpz.xyz All rights reserved.</p>
+        <div className="text-center text-xs text-muted-foreground/60 px-4 py-3 sm:px-2 sm:py-0 border-t sm:border-t-0">
+          <p>Copyright © 2025 Powered by phpZ.xyz</p>
         </div>
       </div>
     </main>
