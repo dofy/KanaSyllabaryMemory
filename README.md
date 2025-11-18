@@ -1,12 +1,6 @@
 # 假名记忆 - Kana Syllabary Memory
 
-<div align="center">
-
 一个优雅的日语假名（平假名、片假名）记忆练习 Web 应用
-
-[在线体验](https://kidynecat.github.io/KanaSyllabaryMemory/) | [功能介绍](#功能特性) | [快速开始](#快速开始)
-
-</div>
 
 ## ✨ 功能特性
 
@@ -67,15 +61,11 @@
 
 ## 🚀 快速开始
 
-### 在线使用
-
-直接访问：[https://kidynecat.github.io/KanaSyllabaryMemory/](https://kidynecat.github.io/KanaSyllabaryMemory/)
-
 ### 本地运行
 
 ```bash
 # 克隆项目
-git clone https://github.com/kidynecat/KanaSyllabaryMemory.git
+git clone https://github.com/dofy/kana-syllabary-memory.git
 cd KanaSyllabaryMemory
 
 # 安装依赖
@@ -120,36 +110,6 @@ pnpm export
    - 切换亮色/暗色主题
    - 设置自动保存
 
-## 🛠️ 技术栈
-
-- **框架**: React 18 + Next.js 14
-- **UI 组件**: shadcn/ui (基于 Radix UI)
-- **样式**: Tailwind CSS
-- **语言**: TypeScript
-- **包管理**: pnpm
-- **主题**: next-themes
-- **图标**: Lucide React
-
-## 📁 项目结构
-
-```
-KanaSyllabaryMemory/
-├── app/                    # Next.js App Router
-│   ├── globals.css        # 全局样式
-│   ├── layout.tsx         # 根布局
-│   └── page.tsx           # 主页面
-├── components/            # React 组件
-│   ├── ui/               # shadcn/ui 组件
-│   └── theme-provider.tsx
-├── lib/                  # 工具库
-│   ├── types.ts         # 类型定义
-│   ├── kana-data.ts     # 假名数据
-│   ├── local-storage.ts # 本地存储
-│   └── utils.ts         # 工具函数
-└── public/              # 静态资源
-    └── assets/          # 音频文件
-```
-
 ## 🎓 学习资源
 
 ### 假名表
@@ -170,27 +130,8 @@ KanaSyllabaryMemory/
 
 MIT License - 详见 [LICENSE](LICENSE) 文件
 
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 👨‍💻 作者
-
-- GitHub: [@kidynecat](https://github.com/kidynecat)
-- 网站: [phpz.xyz](https://phpz.xyz)
-
-## 🔗 相关链接
-
-- [项目迁移说明](MIGRATION.md) - Angular 到 React 的迁移文档
-- [更新日志](CHANGELOG.md) - 版本更新记录
-- [在线演示](https://kidynecat.github.io/KanaSyllabaryMemory/)
-
 ---
-
-<div align="center">
 
 **如果这个项目对你有帮助，请给一个 ⭐️ Star 支持一下！**
 
 Made with ❤️ by [phpz.xyz](https://phpz.xyz)
-
-</div>
