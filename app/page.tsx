@@ -10,7 +10,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Settings, Volume2, Github, Moon, Sun } from "lucide-react";
@@ -192,11 +191,9 @@ export default function Home() {
 
       <div className="w-full max-w-2xl space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center px-1">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
-            假名记忆
-          </h1>
-          <div className="flex gap-1.5 sm:gap-2">
+        <div className="relative">
+          {/* Tool Buttons */}
+          <div className="absolute top-0 right-0 flex gap-1.5 sm:gap-2">
             <Button
               variant="outline"
               size="icon"
@@ -209,6 +206,280 @@ export default function Home() {
                 <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
               )}
             </Button>
+            <Sheet open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 sm:h-10 sm:w-10"
+                >
+                  <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="w-full sm:max-w-md flex flex-col p-0">
+                <SheetHeader className="px-4 sm:px-6 pt-6 pb-4 border-b">
+                  <SheetTitle>设置</SheetTitle>
+                </SheetHeader>
+
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+                  <div className="space-y-5 sm:space-y-6">
+                    {/* Display Mode */}
+                    <div className="space-y-2 sm:space-y-3">
+                      <h3 className="font-semibold text-sm sm:text-base">
+                        显示模式
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { value: "A", label: "混合" },
+                          { value: "Ping", label: "平假名" },
+                          { value: "Pian", label: "片假名" },
+                          { value: "luo", label: "罗马音" },
+                          { value: "swap", label: "互换" },
+                        ].map((mode) => (
+                          <button
+                            key={mode.value}
+                            type="button"
+                            onClick={() =>
+                              setDisplayMode(mode.value as DisplayMode)
+                            }
+                            className={`
+                              px-3 py-1.5 sm:px-4 sm:py-2
+                              text-xs sm:text-sm
+                              rounded-md
+                              border
+                              transition-all
+                              ${
+                                displayMode === mode.value
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background hover:bg-accent hover:text-accent-foreground border-input"
+                              }
+                            `}
+                          >
+                            {mode.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Kana Selection */}
+                    <div className="space-y-2 sm:space-y-3">
+                      <h3 className="font-semibold text-sm sm:text-base">
+                        快速选择
+                      </h3>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-1">
+                          <div className="text-xs text-muted-foreground">
+                            清音 {qingCount}/46
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 text-xs h-7 px-2"
+                              onClick={() =>
+                                selectKanasByType(FYType.qing, true)
+                              }
+                            >
+                              全选
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 text-xs h-7 px-2"
+                              onClick={() =>
+                                selectKanasByType(FYType.qing, false)
+                              }
+                            >
+                              清空
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="text-xs text-muted-foreground">
+                            浊音 {zhuoCount}/25
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 text-xs h-7 px-2"
+                              onClick={() =>
+                                selectKanasByType(FYType.zhuo, true)
+                              }
+                            >
+                              全选
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 text-xs h-7 px-2"
+                              onClick={() =>
+                                selectKanasByType(FYType.zhuo, false)
+                              }
+                            >
+                              清空
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="text-xs text-muted-foreground">
+                            拗音 {niuCount}/33
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 text-xs h-7 px-2"
+                              onClick={() =>
+                                selectKanasByType(FYType.niu, true)
+                              }
+                            >
+                              全选
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 text-xs h-7 px-2"
+                              onClick={() =>
+                                selectKanasByType(FYType.niu, false)
+                              }
+                            >
+                              清空
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Individual Kana Selection */}
+                    <div className="space-y-2 sm:space-y-3">
+                      <h3 className="font-semibold text-sm sm:text-base">
+                        详细选择
+                      </h3>
+                      <div className="space-y-4">
+                        {/* 清音 */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="h-px flex-1 bg-border" />
+                            <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
+                              清音 ({qingCount}/46)
+                            </h4>
+                            <div className="h-px flex-1 bg-border" />
+                          </div>
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-1">
+                            {kanaList
+                              .filter((k) => k.fyType === FYType.qing)
+                              .map((kana) => (
+                                <div
+                                  key={kana.id}
+                                  className="flex items-center space-x-1.5 sm:space-x-2"
+                                >
+                                  <Checkbox
+                                    id={kana.id}
+                                    checked={kana.selected}
+                                    onCheckedChange={() =>
+                                      toggleKanaSelection(kana.id)
+                                    }
+                                    className="h-4 w-4"
+                                  />
+                                  <Label
+                                    htmlFor={kana.id}
+                                    className="text-sm sm:text-base cursor-pointer leading-tight"
+                                  >
+                                    {kana.displayText}
+                                  </Label>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+
+                        {/* 浊音 */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="h-px flex-1 bg-border" />
+                            <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
+                              浊音 ({zhuoCount}/25)
+                            </h4>
+                            <div className="h-px flex-1 bg-border" />
+                          </div>
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-1">
+                            {kanaList
+                              .filter((k) => k.fyType === FYType.zhuo)
+                              .map((kana) => (
+                                <div
+                                  key={kana.id}
+                                  className="flex items-center space-x-1.5 sm:space-x-2"
+                                >
+                                  <Checkbox
+                                    id={kana.id}
+                                    checked={kana.selected}
+                                    onCheckedChange={() =>
+                                      toggleKanaSelection(kana.id)
+                                    }
+                                    className="h-4 w-4"
+                                  />
+                                  <Label
+                                    htmlFor={kana.id}
+                                    className="text-sm sm:text-base cursor-pointer leading-tight"
+                                  >
+                                    {kana.displayText}
+                                  </Label>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+
+                        {/* 拗音 */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="h-px flex-1 bg-border" />
+                            <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
+                              拗音 ({niuCount}/33)
+                            </h4>
+                            <div className="h-px flex-1 bg-border" />
+                          </div>
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-1">
+                            {kanaList
+                              .filter((k) => k.fyType === FYType.niu)
+                              .map((kana) => (
+                                <div
+                                  key={kana.id}
+                                  className="flex items-center space-x-1.5 sm:space-x-2"
+                                >
+                                  <Checkbox
+                                    id={kana.id}
+                                    checked={kana.selected}
+                                    onCheckedChange={() =>
+                                      toggleKanaSelection(kana.id)
+                                    }
+                                    className="h-4 w-4"
+                                  />
+                                  <Label
+                                    htmlFor={kana.id}
+                                    className="text-sm sm:text-base cursor-pointer leading-tight"
+                                  >
+                                    {kana.displayText}
+                                  </Label>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t p-4 sm:p-6">
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={handleSaveSettings}
+                  >
+                    保存设置
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
             <Button
               variant="outline"
               size="icon"
@@ -217,6 +488,13 @@ export default function Home() {
             >
               <Github className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
+          </div>
+
+          {/* Title Section */}
+          <div className="pr-20 sm:pr-24">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              假名記憶
+            </h1>
           </div>
         </div>
 
@@ -269,330 +547,26 @@ export default function Home() {
                 </>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
-                {!isStarted ? (
-                  <Button
-                    className="w-full sm:flex-1"
-                    size="lg"
-                    onClick={handleStart}
-                    disabled={qingCount + zhuoCount + niuCount === 0}
-                  >
-                    开始练习
-                  </Button>
-                ) : (
-                  <Button
-                    className="w-full sm:flex-1"
-                    size="lg"
-                    onClick={getRandomKana}
-                  >
-                    下一个
-                  </Button>
-                )}
-
-                <Sheet open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full sm:w-auto"
-                    >
-                      <Settings className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                      设置
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent className="w-full sm:max-w-md flex flex-col p-0">
-                    <SheetHeader className="px-4 sm:px-6 pt-6 pb-4 border-b">
-                      <SheetTitle>设置</SheetTitle>
-                    </SheetHeader>
-
-                    <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
-                      <div className="space-y-5 sm:space-y-6">
-                        {/* Display Mode */}
-                        <div className="space-y-3 sm:space-y-4">
-                          <h3 className="font-semibold text-base sm:text-lg">
-                            显示模式
-                          </h3>
-                          <RadioGroup
-                            value={displayMode}
-                            onValueChange={(v) =>
-                              setDisplayMode(v as DisplayMode)
-                            }
-                          >
-                            <div className="flex items-center space-x-2 py-1">
-                              <RadioGroupItem value="A" id="mode-a" />
-                              <Label
-                                htmlFor="mode-a"
-                                className="text-sm sm:text-base cursor-pointer"
-                              >
-                                混合
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2 py-1">
-                              <RadioGroupItem value="Ping" id="mode-ping" />
-                              <Label
-                                htmlFor="mode-ping"
-                                className="text-sm sm:text-base cursor-pointer"
-                              >
-                                平假名
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2 py-1">
-                              <RadioGroupItem value="Pian" id="mode-pian" />
-                              <Label
-                                htmlFor="mode-pian"
-                                className="text-sm sm:text-base cursor-pointer"
-                              >
-                                片假名
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2 py-1">
-                              <RadioGroupItem value="luo" id="mode-luo" />
-                              <Label
-                                htmlFor="mode-luo"
-                                className="text-sm sm:text-base cursor-pointer"
-                              >
-                                罗马音
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2 py-1">
-                              <RadioGroupItem value="swap" id="mode-swap" />
-                              <Label
-                                htmlFor="mode-swap"
-                                className="text-sm sm:text-base cursor-pointer"
-                              >
-                                互换
-                              </Label>
-                            </div>
-                          </RadioGroup>
-                        </div>
-
-                        {/* Kana Selection */}
-                        <div className="space-y-3 sm:space-y-4">
-                          <h3 className="font-semibold text-base sm:text-lg">
-                            选择假名类型
-                          </h3>
-                          <div className="space-y-3">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                              <Label className="text-sm sm:text-base">
-                                清音 ({qingCount}/46)
-                              </Label>
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex-1 sm:flex-none text-xs sm:text-sm h-8"
-                                  onClick={() =>
-                                    selectKanasByType(FYType.qing, true)
-                                  }
-                                >
-                                  全选
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex-1 sm:flex-none text-xs sm:text-sm h-8"
-                                  onClick={() =>
-                                    selectKanasByType(FYType.qing, false)
-                                  }
-                                >
-                                  全不选
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                              <Label className="text-sm sm:text-base">
-                                浊音 ({zhuoCount}/25)
-                              </Label>
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex-1 sm:flex-none text-xs sm:text-sm h-8"
-                                  onClick={() =>
-                                    selectKanasByType(FYType.zhuo, true)
-                                  }
-                                >
-                                  全选
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex-1 sm:flex-none text-xs sm:text-sm h-8"
-                                  onClick={() =>
-                                    selectKanasByType(FYType.zhuo, false)
-                                  }
-                                >
-                                  全不选
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                              <Label className="text-sm sm:text-base">
-                                拗音 ({niuCount}/33)
-                              </Label>
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex-1 sm:flex-none text-xs sm:text-sm h-8"
-                                  onClick={() =>
-                                    selectKanasByType(FYType.niu, true)
-                                  }
-                                >
-                                  全选
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex-1 sm:flex-none text-xs sm:text-sm h-8"
-                                  onClick={() =>
-                                    selectKanasByType(FYType.niu, false)
-                                  }
-                                >
-                                  全不选
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Individual Kana Selection */}
-                        <div className="space-y-3 sm:space-y-4">
-                          <h3 className="font-semibold text-base sm:text-lg">
-                            详细选择
-                          </h3>
-                          <div className="space-y-4">
-                            {/* 清音 */}
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <div className="h-px flex-1 bg-border" />
-                                <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                                  清音 ({qingCount}/46)
-                                </h4>
-                                <div className="h-px flex-1 bg-border" />
-                              </div>
-                              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-1">
-                                {kanaList
-                                  .filter((k) => k.fyType === FYType.qing)
-                                  .map((kana) => (
-                                    <div
-                                      key={kana.id}
-                                      className="flex items-center space-x-1.5 sm:space-x-2"
-                                    >
-                                      <Checkbox
-                                        id={kana.id}
-                                        checked={kana.selected}
-                                        onCheckedChange={() =>
-                                          toggleKanaSelection(kana.id)
-                                        }
-                                        className="h-4 w-4"
-                                      />
-                                      <Label
-                                        htmlFor={kana.id}
-                                        className="text-sm sm:text-base cursor-pointer leading-tight"
-                                      >
-                                        {kana.displayText}
-                                      </Label>
-                                    </div>
-                                  ))}
-                              </div>
-                            </div>
-
-                            {/* 浊音 */}
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <div className="h-px flex-1 bg-border" />
-                                <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                                  浊音 ({zhuoCount}/25)
-                                </h4>
-                                <div className="h-px flex-1 bg-border" />
-                              </div>
-                              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-1">
-                                {kanaList
-                                  .filter((k) => k.fyType === FYType.zhuo)
-                                  .map((kana) => (
-                                    <div
-                                      key={kana.id}
-                                      className="flex items-center space-x-1.5 sm:space-x-2"
-                                    >
-                                      <Checkbox
-                                        id={kana.id}
-                                        checked={kana.selected}
-                                        onCheckedChange={() =>
-                                          toggleKanaSelection(kana.id)
-                                        }
-                                        className="h-4 w-4"
-                                      />
-                                      <Label
-                                        htmlFor={kana.id}
-                                        className="text-sm sm:text-base cursor-pointer leading-tight"
-                                      >
-                                        {kana.displayText}
-                                      </Label>
-                                    </div>
-                                  ))}
-                              </div>
-                            </div>
-
-                            {/* 拗音 */}
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <div className="h-px flex-1 bg-border" />
-                                <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                                  拗音 ({niuCount}/33)
-                                </h4>
-                                <div className="h-px flex-1 bg-border" />
-                              </div>
-                              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-1">
-                                {kanaList
-                                  .filter((k) => k.fyType === FYType.niu)
-                                  .map((kana) => (
-                                    <div
-                                      key={kana.id}
-                                      className="flex items-center space-x-1.5 sm:space-x-2"
-                                    >
-                                      <Checkbox
-                                        id={kana.id}
-                                        checked={kana.selected}
-                                        onCheckedChange={() =>
-                                          toggleKanaSelection(kana.id)
-                                        }
-                                        className="h-4 w-4"
-                                      />
-                                      <Label
-                                        htmlFor={kana.id}
-                                        className="text-sm sm:text-base cursor-pointer leading-tight"
-                                      >
-                                        {kana.displayText}
-                                      </Label>
-                                    </div>
-                                  ))}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="border-t px-4 sm:px-6 py-4 bg-background">
-                      <Button
-                        className="w-full"
-                        size="lg"
-                        onClick={handleSaveSettings}
-                      >
-                        保存设置
-                      </Button>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </div>
+              {!isStarted ? (
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={handleStart}
+                  disabled={qingCount + zhuoCount + niuCount === 0}
+                >
+                  开始练习
+                </Button>
+              ) : (
+                <Button className="w-full" size="lg" onClick={getRandomKana}>
+                  下一个
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
 
         {/* Footer */}
-        <div className="text-center text-xs sm:text-sm text-muted-foreground px-2 space-y-1">
-          <p>日语假名（平假名、片假名）记忆练习工具</p>
+        <div className="text-center text-xs text-muted-foreground/60 px-2">
           <p>Copyright © 2025 phpz.xyz All rights reserved.</p>
         </div>
       </div>
