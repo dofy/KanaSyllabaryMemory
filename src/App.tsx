@@ -8,7 +8,7 @@ import PhrasesPage from '@/pages/Phrases'
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="kana-theme">
+    <ThemeProvider defaultTheme="system" storageKey="kana-theme">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/kana" element={<KanaPage />} />
