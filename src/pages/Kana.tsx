@@ -15,12 +15,12 @@ import { LocalStorage } from "@/lib/local-storage";
 import { TTSService } from "@/lib/tts";
 import { FYType, type DisplayMode, type MemoObject } from "@/lib/types";
 import {
-  BookOpen,
-  Brain,
+  GraduationCap,
+  BookMarked,
+  Sparkles,
   Eye,
   Lightbulb,
   ListChecks,
-  Settings,
   Volume2,
 } from "lucide-react";
 import { HelpDialog } from "@/components/help-dialog";
@@ -297,7 +297,7 @@ export default function KanaPage() {
                   {/* Learning Mode */}
                   <div className="space-y-2 sm:space-y-3">
                     <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
-                      <Settings className="h-4 w-4" />
+                      <GraduationCap className="h-4 w-4" />
                       練習模式
                     </h3>
                     <div className="flex gap-2">
@@ -306,7 +306,7 @@ export default function KanaPage() {
                         onClick={() => handleLearningModeChange(true)}
                         className="flex-1 text-xs sm:text-sm h-auto py-2 sm:py-2.5"
                       >
-                        <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                        <BookMarked className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
                         學習模式
                       </Button>
                       <Button
@@ -314,7 +314,7 @@ export default function KanaPage() {
                         onClick={() => handleLearningModeChange(false)}
                         className="flex-1 text-xs sm:text-sm h-auto py-2 sm:py-2.5"
                       >
-                        <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                        <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
                         記憶模式
                       </Button>
                     </div>

@@ -5,7 +5,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Moon, Sun, Monitor, Github, Settings, ArrowLeft, HelpCircle } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  Monitor,
+  Github,
+  Settings,
+  ArrowLeft,
+  HelpCircle,
+} from "lucide-react";
 import { useTheme } from "@/components/theme-provider-custom";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -47,13 +55,6 @@ export function Navigation({
     return <Monitor className="h-5 w-5" />;
   };
 
-  const getThemeLabel = () => {
-    if (!mounted) return "系统";
-    if (theme === "light") return "亮色";
-    if (theme === "dark") return "暗色";
-    return "系统";
-  };
-
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -66,7 +67,10 @@ export function Navigation({
             </Link>
           )}
 
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <Link
+            to="/"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
             <img
               src="/images/favicon.png"
               alt="Logo"
@@ -80,13 +84,23 @@ export function Navigation({
 
         <div className="flex items-center gap-2">
           {onHelpClick && (
-            <Button variant="ghost" size="icon" onClick={onHelpClick} title="幫助">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onHelpClick}
+              title="幫助"
+            >
               <HelpCircle className="h-5 w-5" />
             </Button>
           )}
 
           {onSettingsClick && (
-            <Button variant="ghost" size="icon" onClick={onSettingsClick} title="設置">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onSettingsClick}
+              title="設置"
+            >
               <Settings className="h-5 w-5" />
             </Button>
           )}
@@ -131,4 +145,3 @@ export function Navigation({
     </header>
   );
 }
-

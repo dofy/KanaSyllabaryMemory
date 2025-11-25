@@ -1,5 +1,3 @@
-
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,7 +11,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Navigation } from "@/components/navigation";
 import { HelpDialog } from "@/components/help-dialog";
-import { useKeyboardShortcuts, STANDARD_SHORTCUTS } from "@/hooks/use-keyboard-shortcuts";
+import {
+  useKeyboardShortcuts,
+  STANDARD_SHORTCUTS,
+} from "@/hooks/use-keyboard-shortcuts";
 import { DataLoader } from "@/lib/data-loader";
 import { LocalStorage } from "@/lib/local-storage";
 import { TTSService } from "@/lib/tts";
@@ -24,11 +25,13 @@ import {
 } from "@/lib/types";
 import {
   BookOpen,
-  Brain,
+  GraduationCap,
+  BookMarked,
+  Sparkles,
   Eye,
   Lightbulb,
-  Settings,
   Volume2,
+  Layers,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -44,8 +47,12 @@ export default function PhrasesPage() {
   const [mounted, setMounted] = useState(false);
   const ttsServiceRef = useRef<TTSService | null>(null);
 
-  const [allPhrases, setAllPhrases] = useState<Record<string, PhraseObject[]>>({});
-  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set(["greeting"]));
+  const [allPhrases, setAllPhrases] = useState<Record<string, PhraseObject[]>>(
+    {}
+  );
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
+    new Set(["greeting"])
+  );
   const [displayPhrases, setDisplayPhrases] = useState<PhraseObject[]>([]);
   const [usedPhrases, setUsedPhrases] = useState<PhraseObject[]>([]);
 
@@ -83,8 +90,10 @@ export default function PhrasesPage() {
     try {
       const phrasesData = await DataLoader.loadPhrasesData();
       setAllPhrases(phrasesData);
-      
-      const savedCategories = LocalStorage.load<string[]>("phrases_selectedCategories");
+
+      const savedCategories = LocalStorage.load<string[]>(
+        "phrases_selectedCategories"
+      );
       if (savedCategories && savedCategories.length > 0) {
         setSelectedCategories(new Set(savedCategories));
         updateDisplayPhrases(new Set(savedCategories), phrasesData);
@@ -98,9 +107,15 @@ export default function PhrasesPage() {
   };
 
   const loadSettings = () => {
-    const savedPracticeMode = LocalStorage.load<PracticeMode>("phrases_practiceMode");
-    const savedDisplayMode = LocalStorage.load<UnifiedDisplayMode>("phrases_displayMode");
-    const savedAutoPlaySound = LocalStorage.load<boolean>("phrases_autoPlaySound");
+    const savedPracticeMode = LocalStorage.load<PracticeMode>(
+      "phrases_practiceMode"
+    );
+    const savedDisplayMode = LocalStorage.load<UnifiedDisplayMode>(
+      "phrases_displayMode"
+    );
+    const savedAutoPlaySound = LocalStorage.load<boolean>(
+      "phrases_autoPlaySound"
+    );
 
     if (savedPracticeMode) {
       setPracticeMode(savedPracticeMode);
@@ -114,15 +129,18 @@ export default function PhrasesPage() {
   };
 
   // 更新显示的句子池：合并所有选中分类的句子
-  const updateDisplayPhrases = (categories: Set<string>, phrases: Record<string, PhraseObject[]> = allPhrases) => {
+  const updateDisplayPhrases = (
+    categories: Set<string>,
+    phrases: Record<string, PhraseObject[]> = allPhrases
+  ) => {
     const allSelectedPhrases: PhraseObject[] = [];
-    
-    categories.forEach(category => {
+
+    categories.forEach((category) => {
       if (phrases[category]) {
         allSelectedPhrases.push(...phrases[category]);
       }
     });
-    
+
     setDisplayPhrases([...allSelectedPhrases]);
     setUsedPhrases([]);
   };
@@ -134,12 +152,12 @@ export default function PhrasesPage() {
     } else {
       updated.add(category);
     }
-    
+
     if (updated.size === 0) {
       toast.error("至少需要选择一个场景分类");
       return;
     }
-    
+
     setSelectedCategories(updated);
     LocalStorage.save("phrases_selectedCategories", Array.from(updated));
     updateDisplayPhrases(updated);
@@ -150,7 +168,7 @@ export default function PhrasesPage() {
       toast.error("请至少选择一个场景分类");
       return;
     }
-    
+
     setUsedPhrases([]);
     setIsStarted(true);
     getNextPhrase();
@@ -186,14 +204,19 @@ export default function PhrasesPage() {
       hint: hintText,
     });
 
-    setDisplayPhrases(prev => prev.filter((_, i) => i !== randomIndex));
-    setUsedPhrases(prev => [...prev, selected]);
+    setDisplayPhrases((prev) => prev.filter((_, i) => i !== randomIndex));
+    setUsedPhrases((prev) => [...prev, selected]);
   };
 
   // 用于混合模式的随机选择
-  const [mixedModeDisplay, setMixedModeDisplay] = useState<"kana" | "japanese">("kana");
+  const [mixedModeDisplay, setMixedModeDisplay] = useState<"kana" | "japanese">(
+    "kana"
+  );
 
-  const getDisplayText = (phrase: PhraseObject, mode: UnifiedDisplayMode): string => {
+  const getDisplayText = (
+    phrase: PhraseObject,
+    mode: UnifiedDisplayMode
+  ): string => {
     switch (mode) {
       case "mixed":
         // 混合模式：随机显示假名或日文
@@ -213,7 +236,10 @@ export default function PhrasesPage() {
     }
   };
 
-  const getHintText = (phrase: PhraseObject, mode: UnifiedDisplayMode): string => {
+  const getHintText = (
+    phrase: PhraseObject,
+    mode: UnifiedDisplayMode
+  ): string => {
     switch (mode) {
       case "mixed":
         // 混合模式：提示显示其他信息
@@ -273,9 +299,11 @@ export default function PhrasesPage() {
     ) {
       const timer = setTimeout(() => {
         if (ttsServiceRef.current && currentPhrase.phrase) {
-          ttsServiceRef.current.speak(currentPhrase.phrase.hiragana).catch(() => {
-            // TTS failed silently
-          });
+          ttsServiceRef.current
+            .speak(currentPhrase.phrase.hiragana)
+            .catch(() => {
+              // TTS failed silently
+            });
         }
       }, 500);
       return () => clearTimeout(timer);
@@ -301,130 +329,144 @@ export default function PhrasesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
+    <div className="min-h-screen flex flex-col">
       <Navigation
         showBackButton
         onSettingsClick={() => setIsSettingsOpen(true)}
         onHelpClick={() => setIsHelpOpen(true)}
       />
 
-      <main className="container mx-auto px-4 py-8">
-        {!isStarted ? (
-          <div className="max-w-2xl mx-auto space-y-6">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div>
-                    <h2 className="text-2xl font-bold">句子学习</h2>
-                  </div>
+      <main className="flex-1 flex flex-col sm:items-center sm:justify-center p-0 sm:p-6 md:p-8">
+        <div className="w-full max-w-2xl flex flex-col sm:block h-full sm:h-auto sm:space-y-4">
+          <Card className="flex-1 flex flex-col !border-0 rounded-none sm:rounded-lg overflow-hidden sm:flex-initial shadow-none">
+            <CardContent className="flex-1 flex flex-col p-4 sm:p-6">
+              <div className="flex-1 flex flex-col items-center justify-center space-y-8 sm:space-y-12 py-4 sm:py-8">
+                {!isStarted ? (
+                  <div className="text-center space-y-4 sm:space-y-6 w-full">
+                    <div className="text-5xl sm:text-6xl md:text-7xl font-bold text-muted-foreground">
+                      句子
+                    </div>
 
-                  {/* 场景分类选择（多选） */}
-                  <div className="space-y-2">
-                    <Label>场景分类（可多选）</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {Object.entries(CATEGORY_NAMES).map(([key, name]) => {
-                        const categoryPhrases = allPhrases[key] || [];
-                        const count = categoryPhrases.length;
-                        return (
-                          <div
-                            key={key}
-                            className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
-                            onClick={() => handleCategoryToggle(key)}
-                          >
-                            <Checkbox
-                              checked={selectedCategories.has(key)}
-                              onCheckedChange={() => handleCategoryToggle(key)}
-                            />
-                            <Label className="cursor-pointer flex-1">
-                              <div className="font-medium">{name}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {count} 个句子
-                              </div>
-                            </Label>
+                    <div className="space-y-3 max-w-md mx-auto">
+                      <p className="text-sm text-muted-foreground">
+                        場景分類（可多選）
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Object.entries(CATEGORY_NAMES).map(([key, name]) => {
+                          const categoryPhrases = allPhrases[key] || [];
+                          const count = categoryPhrases.length;
+                          return (
+                            <div
+                              key={key}
+                              className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                              onClick={() => handleCategoryToggle(key)}
+                            >
+                              <Checkbox
+                                checked={selectedCategories.has(key)}
+                                onCheckedChange={() =>
+                                  handleCategoryToggle(key)
+                                }
+                              />
+                              <Label className="cursor-pointer flex-1">
+                                <div className="font-medium">{name}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {count} 個句子
+                                </div>
+                              </Label>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg max-w-md mx-auto">
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          已選分類
+                        </p>
+                        <p className="text-2xl font-bold">
+                          {selectedCategories.size}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          總句子數
+                        </p>
+                        <p className="text-2xl font-bold">{totalPhraseCount}</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+                      <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground text-center leading-relaxed whitespace-pre-line font-kana px-4">
+                        {currentPhrase.displayText}
+                      </div>
+                      {practiceMode === PracticeMode.memory && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-14 w-14 sm:h-16 sm:w-16 rounded-full hover:bg-accent flex-shrink-0"
+                          onClick={handlePronounce}
+                        >
+                          <Volume2 className="h-7 w-7 sm:h-8 sm:w-8" />
+                        </Button>
+                      )}
+                    </div>
+
+                    {showHint && currentPhrase.hint && (
+                      <div className="flex gap-3 sm:gap-4 animate-in fade-in px-4 sm:px-0 w-full justify-center">
+                        <div className="rounded-lg border-2 bg-card px-4 py-3 sm:px-6 sm:py-4 text-center max-w-md">
+                          <div className="text-xs sm:text-sm text-muted-foreground mb-1">
+                            提示
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                          <div className="text-xl sm:text-2xl text-foreground whitespace-pre-line leading-relaxed">
+                            {currentPhrase.hint}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
 
-                  <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-                    <div>
-                      <p className="text-sm text-muted-foreground">已选分类</p>
-                      <p className="text-2xl font-bold">{selectedCategories.size}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">总句子数</p>
-                      <p className="text-2xl font-bold">{totalPhraseCount}</p>
-                    </div>
-                  </div>
-
+              <div className="mt-8 sm:mt-12 md:mt-16">
+                {!isStarted ? (
                   <Button
-                    onClick={handleStart}
                     className="w-full"
                     size="lg"
+                    onClick={handleStart}
                     disabled={totalPhraseCount === 0}
                   >
                     <BookOpen className="h-5 w-5 mr-2" />
-                    开始学习 ({totalPhraseCount} 个句子)
+                    開始學習 ({totalPhraseCount} 個句子)
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <Card className="min-h-[400px] flex items-center justify-center">
-              <CardContent className="pt-6 w-full">
-                <div className="text-center space-y-6">
-                  {/* 显示内容 - 主要内容区域 */}
-                  <div className="text-5xl sm:text-6xl font-bold min-h-[200px] flex items-center justify-center whitespace-pre-line text-foreground leading-relaxed px-4">
-                    {currentPhrase.displayText}
+                ) : (
+                  <div className="flex gap-2 items-center">
+                    {practiceMode === PracticeMode.memory && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-12 w-12 rounded-full flex-shrink-0"
+                        onClick={handleShowHint}
+                        title="顯示提示"
+                      >
+                        <Lightbulb className="h-5 w-5" />
+                      </Button>
+                    )}
+                    <Button
+                      className="flex-1"
+                      size="lg"
+                      onClick={getNextPhrase}
+                    >
+                      下一個
+                    </Button>
                   </div>
-
-                  {/* 提示内容 - 明显的视觉区分 */}
-                  {showHint && currentPhrase.hint && (
-                    <div className="space-y-3 pt-4 border-t border-dashed border-muted-foreground/30 px-4">
-                      <div className="text-xs uppercase tracking-wider text-muted-foreground/70 font-medium">
-                        提示
-                      </div>
-                      <div className="text-xl sm:text-2xl text-muted-foreground whitespace-pre-line leading-relaxed">
-                        {currentPhrase.hint}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex gap-2 items-center justify-center">
-              {practiceMode === PracticeMode.memory && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-12 w-12 rounded-full flex-shrink-0"
-                  onClick={handleShowHint}
-                  title="顯示提示"
-                >
-                  <Lightbulb className="h-5 w-5" />
-                </Button>
-              )}
-              <Button className="flex-1 max-w-xs" size="lg" onClick={getNextPhrase}>
-                下一個
-              </Button>
-              {practiceMode === PracticeMode.memory && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-12 w-12 rounded-full flex-shrink-0"
-                  onClick={handlePronounce}
-                  title="發音"
-                >
-                  <Volume2 className="h-5 w-5" />
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </main>
 
       {/* 设置面板 */}
@@ -439,24 +481,36 @@ export default function PhrasesPage() {
               {/* 学习模式 */}
               <div className="space-y-2 sm:space-y-3">
                 <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
-                  <Brain className="h-4 w-4" />
+                  <GraduationCap className="h-4 w-4" />
                   練習模式
                 </h3>
                 <div className="flex gap-2">
                   <Button
-                    variant={practiceMode === PracticeMode.learning ? "default" : "outline"}
-                    onClick={() => handlePracticeModeChange(PracticeMode.learning)}
+                    variant={
+                      practiceMode === PracticeMode.learning
+                        ? "default"
+                        : "outline"
+                    }
+                    onClick={() =>
+                      handlePracticeModeChange(PracticeMode.learning)
+                    }
                     className="flex-1 text-xs sm:text-sm h-auto py-2 sm:py-2.5"
                   >
-                    <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                    <BookMarked className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
                     學習模式
                   </Button>
                   <Button
-                    variant={practiceMode === PracticeMode.memory ? "default" : "outline"}
-                    onClick={() => handlePracticeModeChange(PracticeMode.memory)}
+                    variant={
+                      practiceMode === PracticeMode.memory
+                        ? "default"
+                        : "outline"
+                    }
+                    onClick={() =>
+                      handlePracticeModeChange(PracticeMode.memory)
+                    }
                     className="flex-1 text-xs sm:text-sm h-auto py-2 sm:py-2.5"
                   >
-                    <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
                     記憶模式
                   </Button>
                 </div>
@@ -513,7 +567,9 @@ export default function PhrasesPage() {
                         displayMode === mode.value ? "default" : "outline"
                       }
                       onClick={() =>
-                        handleDisplayModeChange(mode.value as UnifiedDisplayMode)
+                        handleDisplayModeChange(
+                          mode.value as UnifiedDisplayMode
+                        )
                       }
                       className="flex-1 text-xs sm:text-sm h-auto py-2 sm:py-2.5"
                     >
@@ -526,7 +582,7 @@ export default function PhrasesPage() {
               {/* 场景分类选择 */}
               <div className="space-y-2 sm:space-y-3">
                 <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
+                  <Layers className="h-4 w-4" />
                   場景分類
                 </h3>
                 <div className="space-y-2">

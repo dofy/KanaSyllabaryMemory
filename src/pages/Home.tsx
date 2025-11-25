@@ -13,9 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  BookOpen,
-  Brain,
-  MessageSquare,
+  Languages,
+  BookText,
+  MessageCircle,
   Github,
   Moon,
   Sun,
@@ -48,21 +48,21 @@ export default function Home() {
     {
       title: "假名学习",
       description: "学习和记忆日语假名",
-      icon: BookOpen,
+      icon: Languages,
       href: "/kana",
       color: "text-blue-500",
     },
     {
       title: "单词学习",
       description: "按假名行分类学习日语单词",
-      icon: Brain,
+      icon: BookText,
       href: "/words",
       color: "text-green-500",
     },
     {
       title: "句子学习",
       description: "学习常用日语句子",
-      icon: MessageSquare,
+      icon: MessageCircle,
       href: "/phrases",
       color: "text-purple-500",
     },
@@ -111,10 +111,11 @@ export default function Home() {
             </DropdownMenu>
 
             <a
-              href="https://github.com"
+              href="https://github.com/dofy/KanaSyllabaryMemory"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
+              title="GitHub"
             >
               <Github className="h-5 w-5" />
             </a>

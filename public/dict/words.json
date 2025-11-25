@@ -1853,5 +1853,355 @@
     "romaji": "zou",
     "chinese": "大象",
     "pitch": "①"
+  },
+  {
+    "hiragana": "きゃく",
+    "japanese": "客",
+    "romaji": "kyaku",
+    "chinese": "客人，顾客",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "きゅうきゅうしゃ",
+    "japanese": "救急車",
+    "romaji": "kyuukyuusha",
+    "chinese": "救护车",
+    "pitch": "③"
+  },
+  {
+    "hiragana": "きょうしつ",
+    "japanese": "教室",
+    "romaji": "kyoushitsu",
+    "chinese": "教室",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "きょねん",
+    "japanese": "去年",
+    "romaji": "kyonen",
+    "chinese": "去年",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "しゃしん",
+    "japanese": "写真",
+    "romaji": "shashin",
+    "chinese": "照片",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "しゅくだい",
+    "japanese": "宿題",
+    "romaji": "shukudai",
+    "chinese": "作业",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "しょうかい",
+    "japanese": "紹介",
+    "romaji": "shoukai",
+    "chinese": "介绍",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "しょうゆ",
+    "japanese": "醤油",
+    "romaji": "shouyu",
+    "chinese": "酱油",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "しょうてん",
+    "japanese": "商店",
+    "romaji": "shouten",
+    "chinese": "商店",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "ちゅうい",
+    "japanese": "注意",
+    "romaji": "chuui",
+    "chinese": "注意",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "ちゅうしゃ",
+    "japanese": "駐車",
+    "romaji": "chuusha",
+    "chinese": "停车",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "ちゅうがく",
+    "japanese": "中学",
+    "romaji": "chuugaku",
+    "chinese": "中学",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "ちょっと",
+    "japanese": "ちょっと",
+    "romaji": "chotto",
+    "chinese": "一点，稍微",
+    "pitch": "③"
+  },
+  {
+    "hiragana": "にゅういん",
+    "japanese": "入院",
+    "romaji": "nyuuin",
+    "chinese": "住院",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "にゅうがく",
+    "japanese": "入学",
+    "romaji": "nyuugaku",
+    "chinese": "入学",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "ひゃく",
+    "japanese": "百",
+    "romaji": "hyaku",
+    "chinese": "一百",
+    "pitch": "②"
+  },
+  {
+    "hiragana": "ひょう",
+    "japanese": "表",
+    "romaji": "hyou",
+    "chinese": "表，图表",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "りょこう",
+    "japanese": "旅行",
+    "romaji": "ryokou",
+    "chinese": "旅行",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "りゅうがく",
+    "japanese": "留学",
+    "romaji": "ryuugaku",
+    "chinese": "留学",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "りょうり",
+    "japanese": "料理",
+    "romaji": "ryouri",
+    "chinese": "料理，烹饪",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "りゆう",
+    "japanese": "理由",
+    "romaji": "riyuu",
+    "chinese": "理由",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "ぎゅうにく",
+    "japanese": "牛肉",
+    "romaji": "gyuuniku",
+    "chinese": "牛肉",
+    "pitch": "②"
+  },
+  {
+    "hiragana": "ぎょうじ",
+    "japanese": "行事",
+    "romaji": "gyouji",
+    "chinese": "活动，仪式",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "じゅぎょう",
+    "japanese": "授業",
+    "romaji": "jugyou",
+    "chinese": "上课，授课",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "じょうず",
+    "japanese": "上手",
+    "romaji": "jouzu",
+    "chinese": "擅长，高明",
+    "pitch": "③"
+  },
+  {
+    "hiragana": "じょせい",
+    "japanese": "女性",
+    "romaji": "josei",
+    "chinese": "女性",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "じしょ",
+    "japanese": "辞書",
+    "romaji": "jisho",
+    "chinese": "词典，字典",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "じゃあ",
+    "japanese": "じゃあ",
+    "romaji": "jaa",
+    "chinese": "那么",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "びょうき",
+    "japanese": "病気",
+    "romaji": "byouki",
+    "chinese": "疾病，生病",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "きゅうりょう",
+    "japanese": "給料",
+    "romaji": "kyuuryou",
+    "chinese": "工资",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "しゃかい",
+    "japanese": "社会",
+    "romaji": "shakai",
+    "chinese": "社会",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "しゅじん",
+    "japanese": "主人",
+    "romaji": "shujin",
+    "chinese": "丈夫",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "しょくじ",
+    "japanese": "食事",
+    "romaji": "shokuji",
+    "chinese": "用餐，饭",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "ちゅうもん",
+    "japanese": "注文",
+    "romaji": "chuumon",
+    "chinese": "点菜，订购",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "ちょうど",
+    "japanese": "丁度",
+    "romaji": "choudo",
+    "chinese": "正好，恰好",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "にゅうす",
+    "japanese": "ニュース",
+    "romaji": "nyuusu",
+    "chinese": "新闻",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "ひゃっかてん",
+    "japanese": "百貨店",
+    "romaji": "hyakkaten",
+    "chinese": "百货商店",
+    "pitch": "③"
+  },
+  {
+    "hiragana": "りょうほう",
+    "japanese": "両方",
+    "romaji": "ryouhou",
+    "chinese": "双方，两个",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "りゅうこう",
+    "japanese": "流行",
+    "romaji": "ryuukou",
+    "chinese": "流行",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "ぎゅうどん",
+    "japanese": "牛丼",
+    "romaji": "gyuudon",
+    "chinese": "牛肉盖饭",
+    "pitch": "②"
+  },
+  {
+    "hiragana": "ぎょうざ",
+    "japanese": "餃子",
+    "romaji": "gyouza",
+    "chinese": "饺子",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "じゅうどう",
+    "japanese": "柔道",
+    "romaji": "juudou",
+    "chinese": "柔道",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "じょうほう",
+    "japanese": "情報",
+    "romaji": "jouhou",
+    "chinese": "信息",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "じゃがいも",
+    "japanese": "じゃがいも",
+    "romaji": "jagaimo",
+    "chinese": "土豆",
+    "pitch": "②"
+  },
+  {
+    "hiragana": "ちゃわん",
+    "japanese": "茶碗",
+    "romaji": "chawan",
+    "chinese": "碗",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "みょうじ",
+    "japanese": "名字",
+    "romaji": "myouji",
+    "chinese": "姓氏",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "ぴゃあ",
+    "japanese": "ピアノ",
+    "romaji": "piano",
+    "chinese": "钢琴",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "しゅうまつ",
+    "japanese": "週末",
+    "romaji": "shuumatsu",
+    "chinese": "周末",
+    "pitch": "⓪"
+  },
+  {
+    "hiragana": "ちゅうごく",
+    "japanese": "中国",
+    "romaji": "chuugoku",
+    "chinese": "中国",
+    "pitch": "①"
+  },
+  {
+    "hiragana": "きょうと",
+    "japanese": "京都",
+    "romaji": "kyouto",
+    "chinese": "京都",
+    "pitch": "①"
   }
 ]

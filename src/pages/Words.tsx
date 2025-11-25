@@ -24,7 +24,7 @@ import {
   type UnifiedDisplayMode,
   type WordObject,
 } from "@/lib/types";
-import { BookOpen, Brain, Eye, Filter, Lightbulb, Volume2 } from "lucide-react";
+import { BookOpen, GraduationCap, BookMarked, Sparkles, Eye, Filter, Lightbulb, Volume2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -321,117 +321,118 @@ export default function WordsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
+    <div className="min-h-screen flex flex-col">
       <Navigation
         showBackButton
         onSettingsClick={() => setIsSettingsOpen(true)}
         onHelpClick={() => setIsHelpOpen(true)}
       />
 
-      <main className="container mx-auto px-4 py-8">
-        {!isStarted ? (
-          <div className="max-w-2xl mx-auto space-y-6">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div>
-                    <h2 className="text-2xl font-bold">单词学习</h2>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-                    <div>
-                      <p className="text-sm text-muted-foreground">已选假名</p>
-                      <p className="text-2xl font-bold">{selectedKanaCount}</p>
+      <main className="flex-1 flex flex-col sm:items-center sm:justify-center p-0 sm:p-6 md:p-8">
+        <div className="w-full max-w-2xl flex flex-col sm:block h-full sm:h-auto sm:space-y-4">
+          <Card className="flex-1 flex flex-col !border-0 rounded-none sm:rounded-lg overflow-hidden sm:flex-initial shadow-none">
+            <CardContent className="flex-1 flex flex-col p-4 sm:p-6">
+              <div className="flex-1 flex flex-col items-center justify-center space-y-8 sm:space-y-12 py-4 sm:py-8">
+                {!isStarted ? (
+                  <div className="text-center space-y-4 sm:space-y-6 w-full">
+                    <div className="text-5xl sm:text-6xl md:text-7xl font-bold text-muted-foreground">
+                      單詞
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">关联单词</p>
-                      <p className="text-2xl font-bold">{matchedWordCount}</p>
+                    
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg max-w-md mx-auto">
+                      <div>
+                        <p className="text-sm text-muted-foreground">已選假名</p>
+                        <p className="text-2xl font-bold">{selectedKanaCount}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">關聯單詞</p>
+                        <p className="text-2xl font-bold">{matchedWordCount}</p>
+                      </div>
+                    </div>
+
+                    <div className="text-sm text-muted-foreground max-w-md mx-auto">
+                      <Lightbulb className="inline h-4 w-4 mr-1 mb-1" />
+                      選擇假名，系統會自動篩選包含這些假名的單詞
                     </div>
                   </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+                      <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-foreground text-center font-kana">
+                        <span className="whitespace-pre-line">
+                          {currentWord.displayText}
+                          {currentWord.word && currentWord.word.pitch && (
+                            <sup className="text-2xl text-muted-foreground ml-1 font-normal">
+                              {currentWord.word.pitch}
+                            </sup>
+                          )}
+                        </span>
+                      </div>
+                      {practiceMode === PracticeMode.memory && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-14 w-14 sm:h-16 sm:w-16 rounded-full hover:bg-accent flex-shrink-0"
+                          onClick={handlePronounce}
+                        >
+                          <Volume2 className="h-7 w-7 sm:h-8 sm:w-8" />
+                        </Button>
+                      )}
+                    </div>
 
-                  <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
-                    <Lightbulb className="inline h-4 w-4 mr-1 mb-1 text-blue-500" />
-                    提示：选择基础假名，系统会自动筛选出包含这些假名的单词进行学习。
-                  </div>
+                    {showHint && currentWord.hint && (
+                      <div className="flex gap-3 sm:gap-4 animate-in fade-in px-4 sm:px-0 w-full justify-center">
+                        <div className="rounded-lg border-2 bg-card px-4 py-3 sm:px-6 sm:py-4 text-center max-w-md">
+                          <div className="text-xs sm:text-sm text-muted-foreground mb-1">
+                            提示
+                          </div>
+                          <div className="text-2xl sm:text-3xl text-foreground whitespace-pre-line leading-relaxed">
+                            {currentWord.hint}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
 
+              <div className="mt-8 sm:mt-12 md:mt-16">
+                {!isStarted ? (
                   <Button
-                    onClick={handleStart}
                     className="w-full"
                     size="lg"
+                    onClick={handleStart}
                     disabled={matchedWordCount === 0}
                   >
                     <BookOpen className="h-5 w-5 mr-2" />
-                    开始学习 ({matchedWordCount} 个单词)
+                    開始學習 ({matchedWordCount} 個單詞)
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <Card className="min-h-[400px] flex items-center justify-center">
-              <CardContent className="pt-6 w-full">
-                <div className="text-center space-y-6">
-                  {/* 显示内容 - 主要内容区域 */}
-                  <div className="text-6xl font-bold min-h-[200px] flex items-center justify-center text-foreground">
-                    <span className="whitespace-pre-line">
-                      {currentWord.displayText}
-                      {currentWord.word && currentWord.word.pitch && (
-                        <sup className="text-2xl text-muted-foreground ml-1 font-normal">
-                          {currentWord.word.pitch}
-                        </sup>
-                      )}
-                    </span>
+                ) : (
+                  <div className="flex gap-2 items-center">
+                    {practiceMode === PracticeMode.memory && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-12 w-12 rounded-full flex-shrink-0"
+                        onClick={handleShowHint}
+                        title="顯示提示"
+                      >
+                        <Lightbulb className="h-5 w-5" />
+                      </Button>
+                    )}
+                    <Button
+                      className="flex-1"
+                      size="lg"
+                      onClick={getNextWord}
+                    >
+                      下一個
+                    </Button>
                   </div>
-
-                  {/* 提示内容 - 明显的视觉区分 */}
-                  {showHint && currentWord.hint && (
-                    <div className="space-y-3 pt-4 border-t border-dashed border-muted-foreground/30">
-                      <div className="text-xs uppercase tracking-wider text-muted-foreground/70 font-medium">
-                        提示
-                      </div>
-                      <div className="text-2xl sm:text-3xl text-muted-foreground whitespace-pre-line leading-relaxed">
-                        {currentWord.hint}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex gap-2 items-center justify-center">
-              {practiceMode === PracticeMode.memory && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-12 w-12 rounded-full flex-shrink-0"
-                  onClick={handleShowHint}
-                  title="顯示提示"
-                >
-                  <Lightbulb className="h-5 w-5" />
-                </Button>
-              )}
-              <Button
-                className="flex-1 max-w-xs"
-                size="lg"
-                onClick={getNextWord}
-              >
-                下一個
-              </Button>
-              {practiceMode === PracticeMode.memory && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-12 w-12 rounded-full flex-shrink-0"
-                  onClick={handlePronounce}
-                  title="發音"
-                >
-                  <Volume2 className="h-5 w-5" />
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </main>
 
       {/* 设置面板 */}
@@ -446,7 +447,7 @@ export default function WordsPage() {
               {/* 学习模式 */}
               <div className="space-y-2 sm:space-y-3">
                 <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
-                  <Brain className="h-4 w-4" />
+                  <GraduationCap className="h-4 w-4" />
                   練習模式
                 </h3>
                 <div className="flex gap-2">
@@ -461,7 +462,7 @@ export default function WordsPage() {
                     }
                     className="flex-1 text-xs sm:text-sm h-auto py-2 sm:py-2.5"
                   >
-                    <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                    <BookMarked className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
                     學習模式
                   </Button>
                   <Button
@@ -475,7 +476,7 @@ export default function WordsPage() {
                     }
                     className="flex-1 text-xs sm:text-sm h-auto py-2 sm:py-2.5"
                   >
-                    <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
                     記憶模式
                   </Button>
                 </div>

@@ -3,12 +3,32 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
+  "description": "優雅的日語學習應用，支持假名、單詞、句子三大學習模式",
   "homepage": "https://kana.yahaha.net",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dofy/KanaSyllabaryMemory.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dofy/KanaSyllabaryMemory/issues"
+  },
+  "keywords": [
+    "japanese",
+    "kana",
+    "hiragana",
+    "katakana",
+    "learning",
+    "education",
+    "react",
+    "vite",
+    "typescript"
+  ],
   "author": {
     "name": "Seven Yu",
     "email": "dofyyu@gmail.com",
     "url": "https://yahaha.net"
   },
+  "license": "GPL-3.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
