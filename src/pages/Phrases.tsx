@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Navigation } from "@/components/navigation";
-import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
+import { HelpDialog } from "@/components/help-dialog";
+import { useKeyboardShortcuts, STANDARD_SHORTCUTS } from "@/hooks/use-keyboard-shortcuts";
 import { DataLoader } from "@/lib/data-loader";
 import { LocalStorage } from "@/lib/local-storage";
 import { TTSService } from "@/lib/tts";
@@ -65,6 +66,7 @@ export default function PhrasesPage() {
   );
   const [displayMode, setDisplayMode] = useState<UnifiedDisplayMode>("mixed");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [autoPlaySound, setAutoPlaySound] = useState(false);
 
   useEffect(() => {
@@ -280,34 +282,19 @@ export default function PhrasesPage() {
     }
   }, [currentPhrase.phrase?.hiragana, isStarted, practiceMode, autoPlaySound]);
 
-  // 键盘快捷键
-  useEffect(() => {
-    if (!isStarted || isSettingsOpen) return;
-
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === " ") {
-        e.preventDefault();
-        getNextPhrase();
-      } else if (e.key === "h" || e.key === "H") {
-        e.preventDefault();
-        handleShowHint();
-      } else if (e.key === "p" || e.key === "P") {
-        e.preventDefault();
-        handlePronounce();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isStarted, isSettingsOpen, currentPhrase]);
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onNext: getNextPhrase,
+    onShowHint: handleShowHint,
+    onPlaySound: handlePronounce,
+    onToggleSettings: () => setIsSettingsOpen((prev) => !prev),
+    onToggleHelp: () => setIsHelpOpen((prev) => !prev),
+    isStarted,
+    isSettingsOpen,
+    isHelpOpen,
+  });
 
   const totalPhraseCount = displayPhrases.length + usedPhrases.length;
-
-  const keyboardShortcuts = [
-    { key: "Space", description: "下一個" },
-    { key: "H", description: "提示" },
-    { key: "P", description: "發音" },
-  ];
 
   if (!mounted) {
     return null;
@@ -318,6 +305,7 @@ export default function PhrasesPage() {
       <Navigation
         showBackButton
         onSettingsClick={() => setIsSettingsOpen(true)}
+        onHelpClick={() => setIsHelpOpen(true)}
       />
 
       <main className="container mx-auto px-4 py-8">
@@ -567,13 +555,17 @@ export default function PhrasesPage() {
                   })}
                 </div>
               </div>
-
-              {/* 键盘快捷键 */}
-              <KeyboardShortcuts shortcuts={keyboardShortcuts} />
             </div>
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Help Dialog */}
+      <HelpDialog
+        open={isHelpOpen}
+        onOpenChange={setIsHelpOpen}
+        shortcuts={STANDARD_SHORTCUTS}
+      />
     </div>
   );
 }

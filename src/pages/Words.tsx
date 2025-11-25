@@ -1,5 +1,6 @@
-
-
+import { HelpDialog } from "@/components/help-dialog";
+import { KanaSelector } from "@/components/kana-selector";
+import { Navigation } from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -10,27 +11,20 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
-import { Navigation } from "@/components/navigation";
-import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
-import { KanaSelector } from "@/components/kana-selector";
+import {
+  STANDARD_SHORTCUTS,
+  useKeyboardShortcuts,
+} from "@/hooks/use-keyboard-shortcuts";
 import { DataLoader } from "@/lib/data-loader";
 import { LocalStorage } from "@/lib/local-storage";
 import { TTSService } from "@/lib/tts";
 import {
   PracticeMode,
-  type WordObject,
-  type UnifiedDisplayMode,
   type MemoObject,
+  type UnifiedDisplayMode,
+  type WordObject,
 } from "@/lib/types";
-import {
-  BookOpen,
-  Brain,
-  Eye,
-  Filter,
-  Lightbulb,
-  Volume2,
-  RefreshCw,
-} from "lucide-react";
+import { BookOpen, Brain, Eye, Filter, Lightbulb, Volume2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -60,6 +54,7 @@ export default function WordsPage() {
   );
   const [displayMode, setDisplayMode] = useState<UnifiedDisplayMode>("mixed");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [autoPlaySound, setAutoPlaySound] = useState(false);
 
   useEffect(() => {
@@ -80,14 +75,18 @@ export default function WordsPage() {
 
       // 加载假名数据（用于选择器）
       const kanaData = await DataLoader.loadKanaData();
-      const savedKanaSelections = LocalStorage.load<string[]>("words_kana_selections");
-      
+      const savedKanaSelections = LocalStorage.load<string[]>(
+        "words_kana_selections"
+      );
+
       // 应用保存的假名选择
-      const initializedKanaList = kanaData.map(k => ({
+      const initializedKanaList = kanaData.map((k) => ({
         ...k,
-        selected: savedKanaSelections ? savedKanaSelections.includes(k.romaji) : k.romaji.startsWith('a') // 默认选中a行
+        selected: savedKanaSelections
+          ? savedKanaSelections.includes(k.romaji)
+          : k.selected, // 默认使用 DataLoader 的默认值（清音全选）
       }));
-      
+
       setKanaList(initializedKanaList);
       updateDisplayWords(wordsData, initializedKanaList);
     } catch (error) {
@@ -97,9 +96,13 @@ export default function WordsPage() {
   };
 
   const loadSettings = () => {
-    const savedPracticeMode = LocalStorage.load<PracticeMode>("words_practiceMode");
-    const savedDisplayMode = LocalStorage.load<UnifiedDisplayMode>("words_displayMode");
-    const savedAutoPlaySound = LocalStorage.load<boolean>("words_autoPlaySound");
+    const savedPracticeMode =
+      LocalStorage.load<PracticeMode>("words_practiceMode");
+    const savedDisplayMode =
+      LocalStorage.load<UnifiedDisplayMode>("words_displayMode");
+    const savedAutoPlaySound = LocalStorage.load<boolean>(
+      "words_autoPlaySound"
+    );
 
     if (savedPracticeMode) {
       setPracticeMode(savedPracticeMode);
@@ -114,32 +117,33 @@ export default function WordsPage() {
 
   // 核心筛选逻辑：根据选中的假名筛选单词
   const updateDisplayWords = (words: WordObject[], kanas: MemoObject[]) => {
-    const selectedKanas = kanas.filter(k => k.selected);
-    
+    const selectedKanas = kanas.filter((k) => k.selected);
+
     if (selectedKanas.length === 0) {
       setDisplayWords([]);
       return;
     }
 
     // 提取选中的假名字符（平假名）
-    const selectedChars = new Set(selectedKanas.map(k => k.hiragana));
+    // 按长度降序排列，优先匹配拗音（2个字符）再匹配单个假名
+    const selectedHiraganas = selectedKanas
+      .map((k) => k.hiragana)
+      .sort((a, b) => b.length - a.length);
 
     // 筛选逻辑：单词的假名中是否包含任意一个选中的假名
-    // 优化：如果单词的所有假名都在选中列表中，则匹配度更高（可选）
-    // 目前逻辑：只要包含选中的假名，就纳入学习池
-    const matched = words.filter(word => {
+    const matched = words.filter((word) => {
       // 移除声调标记
-      const cleanHiragana = word.hiragana.replace(/[①②③④⑤⑥⑦⑧⑨⓪]/g, '');
-      
-      // 检查单词中的每个字符
-      for (const char of cleanHiragana) {
-        if (selectedChars.has(char)) {
+      const cleanHiragana = word.hiragana.replace(/[①②③④⑤⑥⑦⑧⑨⓪]/g, "");
+
+      // 检查单词是否包含任意选中的假名（支持拗音）
+      for (const kana of selectedHiraganas) {
+        if (cleanHiragana.includes(kana)) {
           return true;
         }
       }
       return false;
     });
-    
+
     setDisplayWords(matched);
     setUsedWords([]);
   };
@@ -147,11 +151,11 @@ export default function WordsPage() {
   const handleKanaSelectionChange = (updatedKanaList: MemoObject[]) => {
     setKanaList(updatedKanaList);
     updateDisplayWords(allWords, updatedKanaList);
-    
+
     // 保存选择
     const selectedRomaji = updatedKanaList
-      .filter(k => k.selected)
-      .map(k => k.romaji);
+      .filter((k) => k.selected)
+      .map((k) => k.romaji);
     LocalStorage.save("words_kana_selections", selectedRomaji);
   };
 
@@ -160,7 +164,7 @@ export default function WordsPage() {
       toast.error("请至少选择一个假名，且确保有匹配的单词");
       return;
     }
-    
+
     setUsedWords([]);
     setIsStarted(true);
     getNextWord();
@@ -196,14 +200,19 @@ export default function WordsPage() {
       hint: hintText,
     });
 
-    setDisplayWords(prev => prev.filter((_, i) => i !== randomIndex));
-    setUsedWords(prev => [...prev, selected]);
+    setDisplayWords((prev) => prev.filter((_, i) => i !== randomIndex));
+    setUsedWords((prev) => [...prev, selected]);
   };
 
   // 用于混合模式的随机选择
-  const [mixedModeDisplay, setMixedModeDisplay] = useState<"kana" | "japanese">("kana");
+  const [mixedModeDisplay, setMixedModeDisplay] = useState<"kana" | "japanese">(
+    "kana"
+  );
 
-  const getDisplayText = (word: WordObject, mode: UnifiedDisplayMode): string => {
+  const getDisplayText = (
+    word: WordObject,
+    mode: UnifiedDisplayMode
+  ): string => {
     switch (mode) {
       case "mixed":
         // 混合模式：随机显示假名或日文
@@ -292,35 +301,20 @@ export default function WordsPage() {
     }
   }, [currentWord.word?.hiragana, isStarted, practiceMode, autoPlaySound]);
 
-  // 键盘快捷键
-  useEffect(() => {
-    if (!isStarted || isSettingsOpen) return;
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onNext: getNextWord,
+    onShowHint: handleShowHint,
+    onPlaySound: handlePronounce,
+    onToggleSettings: () => setIsSettingsOpen((prev) => !prev),
+    onToggleHelp: () => setIsHelpOpen((prev) => !prev),
+    isStarted,
+    isSettingsOpen,
+    isHelpOpen,
+  });
 
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === " ") {
-        e.preventDefault();
-        getNextWord();
-      } else if (e.key === "h" || e.key === "H") {
-        e.preventDefault();
-        handleShowHint();
-      } else if (e.key === "p" || e.key === "P") {
-        e.preventDefault();
-        handlePronounce();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isStarted, isSettingsOpen, currentWord]);
-
-  const selectedKanaCount = kanaList.filter(k => k.selected).length;
+  const selectedKanaCount = kanaList.filter((k) => k.selected).length;
   const matchedWordCount = displayWords.length + usedWords.length;
-
-  const keyboardShortcuts = [
-    { key: "Space", description: "下一个" },
-    { key: "H", description: "提示" },
-    { key: "P", description: "发音" },
-  ];
 
   if (!mounted) {
     return null;
@@ -331,6 +325,7 @@ export default function WordsPage() {
       <Navigation
         showBackButton
         onSettingsClick={() => setIsSettingsOpen(true)}
+        onHelpClick={() => setIsHelpOpen(true)}
       />
 
       <main className="container mx-auto px-4 py-8">
@@ -416,7 +411,11 @@ export default function WordsPage() {
                   <Lightbulb className="h-5 w-5" />
                 </Button>
               )}
-              <Button className="flex-1 max-w-xs" size="lg" onClick={getNextWord}>
+              <Button
+                className="flex-1 max-w-xs"
+                size="lg"
+                onClick={getNextWord}
+              >
                 下一個
               </Button>
               {practiceMode === PracticeMode.memory && (
@@ -452,16 +451,28 @@ export default function WordsPage() {
                 </h3>
                 <div className="flex gap-2">
                   <Button
-                    variant={practiceMode === PracticeMode.learning ? "default" : "outline"}
-                    onClick={() => handlePracticeModeChange(PracticeMode.learning)}
+                    variant={
+                      practiceMode === PracticeMode.learning
+                        ? "default"
+                        : "outline"
+                    }
+                    onClick={() =>
+                      handlePracticeModeChange(PracticeMode.learning)
+                    }
                     className="flex-1 text-xs sm:text-sm h-auto py-2 sm:py-2.5"
                   >
                     <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
                     學習模式
                   </Button>
                   <Button
-                    variant={practiceMode === PracticeMode.memory ? "default" : "outline"}
-                    onClick={() => handlePracticeModeChange(PracticeMode.memory)}
+                    variant={
+                      practiceMode === PracticeMode.memory
+                        ? "default"
+                        : "outline"
+                    }
+                    onClick={() =>
+                      handlePracticeModeChange(PracticeMode.memory)
+                    }
                     className="flex-1 text-xs sm:text-sm h-auto py-2 sm:py-2.5"
                   >
                     <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
@@ -521,7 +532,9 @@ export default function WordsPage() {
                         displayMode === mode.value ? "default" : "outline"
                       }
                       onClick={() =>
-                        handleDisplayModeChange(mode.value as UnifiedDisplayMode)
+                        handleDisplayModeChange(
+                          mode.value as UnifiedDisplayMode
+                        )
                       }
                       className="flex-1 text-xs sm:text-sm h-auto py-2 sm:py-2.5"
                     >
@@ -539,25 +552,31 @@ export default function WordsPage() {
                     假名範圍
                   </h3>
                   <span className="text-xs sm:text-sm text-muted-foreground">
-                    關聯: <span className="font-bold text-foreground">{matchedWordCount}</span>
+                    關聯:{" "}
+                    <span className="font-bold text-foreground">
+                      {matchedWordCount}
+                    </span>
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   選擇您已掌握的假名，系統將為您提供包含這些假名的單詞進行練習。
                 </p>
-                <KanaSelector 
-                  kanaList={kanaList} 
-                  onSelectionChange={handleKanaSelectionChange} 
+                <KanaSelector
+                  kanaList={kanaList}
+                  onSelectionChange={handleKanaSelectionChange}
                 />
               </div>
-
-              {/* 键盘快捷键 */}
-              <KeyboardShortcuts shortcuts={keyboardShortcuts} />
             </div>
           </div>
         </SheetContent>
       </Sheet>
 
+      {/* Help Dialog */}
+      <HelpDialog
+        open={isHelpOpen}
+        onOpenChange={setIsHelpOpen}
+        shortcuts={STANDARD_SHORTCUTS}
+      />
     </div>
   );
 }

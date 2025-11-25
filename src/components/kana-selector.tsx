@@ -1,18 +1,18 @@
-
-
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FYType, type MemoObject } from "@/lib/types";
-import { CheckSquare, Minimize2, Square } from "lucide-react";
+import { CheckSquare, Square } from "lucide-react";
 
 interface KanaSelectorProps {
   kanaList: MemoObject[];
   onSelectionChange: (updatedList: MemoObject[]) => void;
 }
 
-export function KanaSelector({ kanaList, onSelectionChange }: KanaSelectorProps) {
+export function KanaSelector({
+  kanaList,
+  onSelectionChange,
+}: KanaSelectorProps) {
   const updateSelection = (updatedList: MemoObject[]) => {
     onSelectionChange(updatedList);
   };
@@ -31,37 +31,6 @@ export function KanaSelector({ kanaList, onSelectionChange }: KanaSelectorProps)
     updateSelection(updated);
   };
 
-  const invertSelectionByType = (type: FYType) => {
-    const updated = kanaList.map((k) =>
-      k.fyType === type ? { ...k, selected: !k.selected } : k
-    );
-    updateSelection(updated);
-  };
-
-  // 按行分组逻辑
-  const getKanaRows = (kanas: MemoObject[]) => {
-    const rows: Record<string, MemoObject[]> = {};
-    kanas.forEach((kana) => {
-      // 简单的行分组逻辑：根据罗马音首字母
-      let rowKey = "other";
-      if (kana.fyType === FYType.seion) {
-        const firstChar = kana.romaji.charAt(0);
-        if (["a", "i", "u", "e", "o"].includes(kana.romaji)) rowKey = "a";
-        else rowKey = firstChar;
-      } else if (kana.fyType === FYType.dakuon) {
-        const firstChar = kana.romaji.charAt(0);
-        rowKey = firstChar;
-      } else {
-        // 拗音按首字母分组
-        rowKey = kana.romaji.charAt(0);
-      }
-      
-      if (!rows[rowKey]) rows[rowKey] = [];
-      rows[rowKey].push(kana);
-    });
-    return rows;
-  };
-
   // 渲染假名网格
   const renderKanaGrid = (type: FYType) => {
     const kanas = kanaList.filter((k) => k.fyType === type);
@@ -76,14 +45,14 @@ export function KanaSelector({ kanaList, onSelectionChange }: KanaSelectorProps)
       [FYType.dakuon]: "濁音",
       [FYType.yoon]: "拗音",
     };
-    
+
     const typeCounts = {
       [FYType.seion]: 46,
       [FYType.dakuon]: 25,
       [FYType.yoon]: 33,
     };
-    
-    const selectedCount = kanas.filter(k => k.selected).length;
+
+    const selectedCount = kanas.filter((k) => k.selected).length;
     const totalCount = typeCounts[type];
 
     return (
@@ -117,20 +86,26 @@ export function KanaSelector({ kanaList, onSelectionChange }: KanaSelectorProps)
         <div className="grid grid-cols-5 gap-2 sm:gap-3">
           {kanas.map((kana) => (
             <div
-              key={kana.romaji}
+              key={kana.hiragana}
               className="flex flex-col items-center p-1.5 sm:p-2 border rounded hover:bg-muted/50 cursor-pointer"
               onClick={() => toggleKanaSelection(kana.romaji)}
             >
               <div className="flex items-center justify-between w-full mb-1">
-                <span className="text-[10px] sm:text-xs text-muted-foreground uppercase">{kana.romaji}</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground uppercase">
+                  {kana.romaji}
+                </span>
                 <Checkbox
                   checked={kana.selected}
                   onCheckedChange={() => toggleKanaSelection(kana.romaji)}
                   className="h-3 w-3 sm:h-4 sm:w-4"
                 />
               </div>
-              <div className="text-base sm:text-lg font-bold">{kana.hiragana}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">{kana.katakana}</div>
+              <div className="text-base sm:text-lg font-bold">
+                {kana.hiragana}
+              </div>
+              <div className="text-xs sm:text-sm text-muted-foreground">
+                {kana.katakana}
+              </div>
             </div>
           ))}
         </div>
@@ -141,9 +116,15 @@ export function KanaSelector({ kanaList, onSelectionChange }: KanaSelectorProps)
   return (
     <Tabs defaultValue="seion" className="w-full">
       <TabsList className="grid w-full grid-cols-3 mb-3 sm:mb-4">
-        <TabsTrigger value="seion" className="text-xs sm:text-sm">清音</TabsTrigger>
-        <TabsTrigger value="dakuon" className="text-xs sm:text-sm">濁音</TabsTrigger>
-        <TabsTrigger value="yoon" className="text-xs sm:text-sm">拗音</TabsTrigger>
+        <TabsTrigger value="seion" className="text-xs sm:text-sm">
+          清音
+        </TabsTrigger>
+        <TabsTrigger value="dakuon" className="text-xs sm:text-sm">
+          濁音
+        </TabsTrigger>
+        <TabsTrigger value="yoon" className="text-xs sm:text-sm">
+          拗音
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="seion" className="mt-0">
         {renderKanaGrid(FYType.seion)}
@@ -157,4 +138,3 @@ export function KanaSelector({ kanaList, onSelectionChange }: KanaSelectorProps)
     </Tabs>
   );
 }
-

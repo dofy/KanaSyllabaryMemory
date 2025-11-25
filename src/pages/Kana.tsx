@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
@@ -10,22 +9,25 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Navigation } from "@/components/navigation";
-import { KanaData } from "@/lib/kana-data";
+import { KanaSelector } from "@/components/kana-selector";
+import { DataLoader } from "@/lib/data-loader";
 import { LocalStorage } from "@/lib/local-storage";
 import { TTSService } from "@/lib/tts";
 import { FYType, type DisplayMode, type MemoObject } from "@/lib/types";
 import {
   BookOpen,
   Brain,
-  CheckSquare,
   Eye,
   Lightbulb,
   ListChecks,
   Settings,
-  Square,
   Volume2,
 } from "lucide-react";
-import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
+import { HelpDialog } from "@/components/help-dialog";
+import {
+  useKeyboardShortcuts,
+  STANDARD_SHORTCUTS,
+} from "@/hooks/use-keyboard-shortcuts";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -47,6 +49,7 @@ export default function KanaPage() {
   const [showRemind, setShowRemind] = useState(false);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("mixed");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isLearningMode, setIsLearningMode] = useState(false);
   const [autoPlaySound, setAutoPlaySound] = useState(false);
 
@@ -59,17 +62,29 @@ export default function KanaPage() {
     }
   }, []);
 
-  const loadKanaData = () => {
-    const kd = new KanaData();
+  const loadKanaData = async () => {
     const savedData = LocalStorage.load<MemoObject[]>("kana_selectedData");
     const savedMode = LocalStorage.load<DisplayMode>("kana_displayType");
     const savedLearningMode = LocalStorage.load<boolean>("kana_learningMode");
     const savedAutoPlaySound = LocalStorage.load<boolean>("kana_autoPlaySound");
 
-    if (savedData) {
-      setKanaList(savedData);
+    // Always load fresh data from JSON to ensure correct data structure
+    const data = await DataLoader.loadKanaData();
+    
+    // If there's saved data, merge the selection state
+    if (savedData && savedData.length > 0) {
+      const savedSelectionMap = new Map(
+        savedData.map(item => [item.romaji, item.selected])
+      );
+      
+      const mergedData = data.map(item => ({
+        ...item,
+        selected: savedSelectionMap.get(item.romaji) ?? item.selected
+      }));
+      
+      setKanaList(mergedData);
     } else {
-      setKanaList(kd.getJP50());
+      setKanaList(data);
     }
 
     if (savedMode) {
@@ -110,77 +125,12 @@ export default function KanaPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentKana.displayText]);
 
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Ignore if typing in input fields
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
-        return;
-      }
-
-      switch (e.key.toLowerCase()) {
-        case "s":
-          setIsSettingsOpen((prev) => !prev);
-          break;
-        case " ":
-        case "arrowright":
-        case "n":
-          if (isStarted && !isSettingsOpen) {
-            e.preventDefault();
-            getRandomKana();
-          }
-          break;
-        case "h":
-        case "?":
-          if (isStarted && !isSettingsOpen) {
-            setShowRemind((prev) => !prev);
-          }
-          break;
-        case "p":
-        case "v":
-          if (isStarted && currentKana.displayText && !isSettingsOpen) {
-            playSound(currentKana.displayText);
-          }
-          break;
-        default:
-          break;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isStarted, isSettingsOpen, currentKana.displayText]);
-
-  const toggleKanaSelection = (romaji: string) => {
-    const updated = kanaList.map((k) =>
-      k.romaji === romaji ? { ...k, selected: !k.selected } : k
-    );
-    setKanaList(updated);
-    LocalStorage.save("kana_selectedData", updated);
-
-    const selectedCount = updated.filter((k) => k.selected).length;
-    toast.success(`已更新選擇，當前已選擇 ${selectedCount} 個假名`);
-  };
-
-  const selectKanasByType = (type: FYType, selected: boolean) => {
-    const updated = kanaList.map((k) =>
-      k.fyType === type ? { ...k, selected } : k
-    );
-    setKanaList(updated);
-    LocalStorage.save("kana_selectedData", updated);
-
-    const typeName =
-      type === FYType.seion ? "清音" : type === FYType.dakuon ? "濁音" : "拗音";
-    const action = selected ? "全選" : "清空";
-    toast.success(`已${action}${typeName}`);
-  };
-
-  const handleStart = () => {
-    setIsStarted(true);
-    getRandomKana();
+  const playSound = (text: string) => {
+    if (ttsServiceRef.current) {
+      ttsServiceRef.current.speak(text).catch(() => {
+        // TTS failed silently
+      });
+    }
   };
 
   const getRandomKana = () => {
@@ -248,12 +198,27 @@ export default function KanaPage() {
     }
   };
 
-  const playSound = (text: string) => {
-    if (ttsServiceRef.current) {
-      ttsServiceRef.current.speak(text).catch(() => {
-        // TTS failed silently
-      });
-    }
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onNext: getRandomKana,
+    onShowHint: () => setShowRemind((prev) => !prev),
+    onPlaySound: () =>
+      currentKana.displayText && playSound(currentKana.displayText),
+    onToggleSettings: () => setIsSettingsOpen((prev) => !prev),
+    onToggleHelp: () => setIsHelpOpen((prev) => !prev),
+    isStarted,
+    isSettingsOpen,
+    isHelpOpen,
+  });
+
+  const handleKanaSelectionChange = (updatedList: MemoObject[]) => {
+    setKanaList(updatedList);
+    LocalStorage.save("kana_selectedData", updatedList);
+  };
+
+  const handleStart = () => {
+    setIsStarted(true);
+    getRandomKana();
   };
 
   const getKanaType = (text: string): string => {
@@ -312,9 +277,10 @@ export default function KanaPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navigation 
+      <Navigation
         showBackButton={true}
         onSettingsClick={() => setIsSettingsOpen(true)}
+        onHelpClick={() => setIsHelpOpen(true)}
       />
 
       <main className="flex-1 flex flex-col sm:items-center sm:justify-center p-0 sm:p-6 md:p-8">
@@ -328,7 +294,6 @@ export default function KanaPage() {
 
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 mb-4">
                 <div className="space-y-5 sm:space-y-6">
-
                   {/* Learning Mode */}
                   <div className="space-y-2 sm:space-y-3">
                     <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
@@ -418,233 +383,31 @@ export default function KanaPage() {
                     </div>
                   </div>
 
-                  {/* Kana Selection */}
+                  {/* 假名选择 */}
                   <div className="space-y-2 sm:space-y-3">
                     <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
                       <ListChecks className="h-4 w-4" />
-                      批量操作
+                      假名選擇
                     </h3>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="rounded-lg border bg-card p-3 space-y-2">
-                        <div className="text-xs font-medium text-center">
-                          清音 {seionCount}/46
-                        </div>
-                        <div className="flex gap-1.5">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="flex-1 h-8"
-                            onClick={() =>
-                              selectKanasByType(FYType.seion, true)
-                            }
-                            title="全選"
-                          >
-                            <CheckSquare className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="flex-1 h-8"
-                            onClick={() =>
-                              selectKanasByType(FYType.seion, false)
-                            }
-                            title="清空"
-                          >
-                            <Square className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="rounded-lg border bg-card p-3 space-y-2">
-                        <div className="text-xs font-medium text-center">
-                          濁音 {dakuonCount}/25
-                        </div>
-                        <div className="flex gap-1.5">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="flex-1 h-8"
-                            onClick={() =>
-                              selectKanasByType(FYType.dakuon, true)
-                            }
-                            title="全選"
-                          >
-                            <CheckSquare className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="flex-1 h-8"
-                            onClick={() =>
-                              selectKanasByType(FYType.dakuon, false)
-                            }
-                            title="清空"
-                          >
-                            <Square className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="rounded-lg border bg-card p-3 space-y-2">
-                        <div className="text-xs font-medium text-center">
-                          拗音 {yoonCount}/33
-                        </div>
-                        <div className="flex gap-1.5">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="flex-1 h-8"
-                            onClick={() =>
-                              selectKanasByType(FYType.yoon, true)
-                            }
-                            title="全選"
-                          >
-                            <CheckSquare className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="flex-1 h-8"
-                            onClick={() =>
-                              selectKanasByType(FYType.yoon, false)
-                            }
-                            title="清空"
-                          >
-                            <Square className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      選擇您想要練習的假名類型和範圍。
+                    </p>
+                    <KanaSelector 
+                      kanaList={kanaList} 
+                      onSelectionChange={handleKanaSelectionChange} 
+                    />
                   </div>
-
-                  {/* Individual Kana Selection */}
-                  <div className="space-y-2 sm:space-y-3">
-                    <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
-                      <ListChecks className="h-4 w-4" />
-                      單個選擇
-                    </h3>
-                    <div className="space-y-4">
-                      {/* 清音 */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <div className="h-px flex-1 bg-border" />
-                          <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                            清音 ({seionCount}/46)
-                          </h4>
-                          <div className="h-px flex-1 bg-border" />
-                        </div>
-                        <div className="grid grid-cols-5 gap-3 pt-1">
-                          {kanaList
-                            .filter((k) => k.fyType === FYType.seion)
-                            .map((kana) => (
-                              <div
-                                key={kana.romaji}
-                                className="flex items-center space-x-1.5 sm:space-x-2"
-                              >
-                                <Checkbox
-                                  id={kana.romaji}
-                                  checked={kana.selected}
-                                  onCheckedChange={() =>
-                                    toggleKanaSelection(kana.romaji)
-                                  }
-                                  className="h-4 w-4"
-                                />
-                                <Label
-                                  htmlFor={kana.romaji}
-                                  className="text-sm sm:text-base cursor-pointer leading-tight"
-                                >
-                                  {kana.displayText}
-                                </Label>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-
-                      {/* 濁音 */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <div className="h-px flex-1 bg-border" />
-                          <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                            濁音 ({dakuonCount}/25)
-                          </h4>
-                          <div className="h-px flex-1 bg-border" />
-                        </div>
-                        <div className="grid grid-cols-5 gap-3 pt-1">
-                          {kanaList
-                            .filter((k) => k.fyType === FYType.dakuon)
-                            .map((kana) => (
-                              <div
-                                key={kana.romaji}
-                                className="flex items-center space-x-1.5 sm:space-x-2"
-                              >
-                                <Checkbox
-                                  id={kana.romaji}
-                                  checked={kana.selected}
-                                  onCheckedChange={() =>
-                                    toggleKanaSelection(kana.romaji)
-                                  }
-                                  className="h-4 w-4"
-                                />
-                                <Label
-                                  htmlFor={kana.romaji}
-                                  className="text-sm sm:text-base cursor-pointer leading-tight"
-                                >
-                                  {kana.displayText}
-                                </Label>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-
-                      {/* 拗音 */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <div className="h-px flex-1 bg-border" />
-                          <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                            拗音 ({yoonCount}/33)
-                          </h4>
-                          <div className="h-px flex-1 bg-border" />
-                        </div>
-                        <div className="grid grid-cols-5 gap-3 pt-1">
-                          {kanaList
-                            .filter((k) => k.fyType === FYType.yoon)
-                            .map((kana) => (
-                              <div
-                                key={kana.romaji}
-                                className="flex items-center space-x-1.5 sm:space-x-2"
-                              >
-                                <Checkbox
-                                  id={kana.romaji}
-                                  checked={kana.selected}
-                                  onCheckedChange={() =>
-                                    toggleKanaSelection(kana.romaji)
-                                  }
-                                  className="h-4 w-4"
-                                />
-                                <Label
-                                  htmlFor={kana.romaji}
-                                  className="text-sm sm:text-base cursor-pointer leading-tight"
-                                >
-                                  {kana.displayText}
-                                </Label>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Keyboard Shortcuts */}
-                  <KeyboardShortcuts
-                    shortcuts={[
-                      { key: "S", description: "開關設置" },
-                      { key: "Space", description: "下一個" },
-                      { key: "H / ?", description: "顯示提示" },
-                      { key: "P / V", description: "播放發音" },
-                    ]}
-                  />
                 </div>
               </div>
             </SheetContent>
           </Sheet>
+
+          {/* Help Dialog */}
+          <HelpDialog
+            open={isHelpOpen}
+            onOpenChange={setIsHelpOpen}
+            shortcuts={STANDARD_SHORTCUTS}
+          />
 
           {/* Main Card */}
           <Card className="flex-1 flex flex-col !border-0 rounded-none sm:rounded-lg overflow-hidden sm:flex-initial shadow-none">
@@ -722,7 +485,11 @@ export default function KanaPage() {
                         <Lightbulb className="h-5 w-5" />
                       </Button>
                     )}
-                    <Button className="flex-1" size="lg" onClick={getRandomKana}>
+                    <Button
+                      className="flex-1"
+                      size="lg"
+                      onClick={getRandomKana}
+                    >
                       下一個
                     </Button>
                   </div>
@@ -735,4 +502,3 @@ export default function KanaPage() {
     </div>
   );
 }
-

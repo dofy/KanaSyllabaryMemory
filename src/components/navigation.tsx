@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Moon, Sun, Monitor, Github, Settings, ArrowLeft } from "lucide-react";
+import { Moon, Sun, Monitor, Github, Settings, ArrowLeft, HelpCircle } from "lucide-react";
 import { useTheme } from "@/components/theme-provider-custom";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -14,12 +14,14 @@ interface NavigationProps {
   title?: string;
   showBackButton?: boolean;
   onSettingsClick?: () => void;
+  onHelpClick?: () => void;
 }
 
 export function Navigation({
   title = "日语学习工具",
   showBackButton = false,
   onSettingsClick,
+  onHelpClick,
 }: NavigationProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -77,8 +79,14 @@ export function Navigation({
         </div>
 
         <div className="flex items-center gap-2">
+          {onHelpClick && (
+            <Button variant="ghost" size="icon" onClick={onHelpClick} title="幫助">
+              <HelpCircle className="h-5 w-5" />
+            </Button>
+          )}
+
           {onSettingsClick && (
-            <Button variant="ghost" size="icon" onClick={onSettingsClick}>
+            <Button variant="ghost" size="icon" onClick={onSettingsClick} title="設置">
               <Settings className="h-5 w-5" />
             </Button>
           )}
