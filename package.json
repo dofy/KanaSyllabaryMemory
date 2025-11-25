@@ -1,16 +1,16 @@
 {
-  "name": "kana-syllabary-memory",
-  "version": "2.0.0",
+  "name": "kana-memory",
+  "version": "3.9.0",
   "private": true,
   "type": "module",
-  "description": "優雅的日語學習應用，支持假名、單詞、句子三大學習模式",
+  "description": "Kana Memory | 在線日語學習工具，支持假名、單詞、句子三大學習模式與快捷鍵導航",
   "homepage": "https://kana.yahaha.net",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dofy/KanaSyllabaryMemory.git"
+    "url": "https://github.com/dofy/KanaMemory.git"
   },
   "bugs": {
-    "url": "https://github.com/dofy/KanaSyllabaryMemory/issues"
+    "url": "https://github.com/dofy/KanaMemory/issues"
   },
   "keywords": [
     "japanese",
