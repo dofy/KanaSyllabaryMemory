@@ -43,12 +43,12 @@ export class DataLoader {
       }
 
       const data: KanaDataJson = await response.json();
-      
+
       // Convert and add UI state
       this.kanaCache = [
-        ...data.seion.map(item => this.convertKanaItem(item, 0)),   // FYType.seion
-        ...data.dakuon.map(item => this.convertKanaItem(item, 1)),  // FYType.dakuon
-        ...data.yoon.map(item => this.convertKanaItem(item, 2)),    // FYType.yoon
+        ...data.seion.map((item) => this.convertKanaItem(item, 0)), // FYType.seion
+        ...data.dakuon.map((item) => this.convertKanaItem(item, 1)), // FYType.dakuon
+        ...data.yoon.map((item) => this.convertKanaItem(item, 2)), // FYType.yoon
       ];
 
       return this.kanaCache;
@@ -71,13 +71,13 @@ export class DataLoader {
       }
 
       const data: WordItem[] = await response.json();
-      
+
       // Add UI state to each word
-      this.wordsCache = data.map(word => ({
+      this.wordsCache = data.map((word) => ({
         ...word,
-        selected: true  // Default: all words selected
+        selected: true, // Default: all words selected
       }));
-      
+
       return this.wordsCache;
     } catch (error) {
       console.error("Error loading words data:", error);
@@ -98,16 +98,16 @@ export class DataLoader {
       }
 
       const data: Record<string, PhraseItem[]> = await response.json();
-      
+
       // Add UI state to each phrase
       this.phrasesCache = {};
       for (const category in data) {
-        this.phrasesCache[category] = data[category].map(phrase => ({
+        this.phrasesCache[category] = data[category].map((phrase) => ({
           ...phrase,
-          selected: true  // Default: all phrases selected
+          selected: true, // Default: all phrases selected
         }));
       }
-      
+
       return this.phrasesCache;
     } catch (error) {
       console.error("Error loading phrases data:", error);
@@ -139,4 +139,3 @@ export class DataLoader {
     this.phrasesCache = null;
   }
 }
-
